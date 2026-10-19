@@ -126,9 +126,13 @@ def generate_draft(idea):
         text = ''.join(part['text'] for part in parts if not part.get('thought') and isinstance(part.get('text'), str))
         return validate_draft(json.loads(text))
     except HTTPError as exc:
+        error_details = exc.read(2000).decode("utf-8", errors="replace")
+        print(f"Gemini API ERROR: HTTP {exc.code} - {error_details}", flush=True)
+
         if exc.code == 429:
-            raise BuilderError('Gemini’s free-tier quota is currently unavailable. Try later or use the local starter.') from None
-        raise BuilderError('Gemini could not process the request. Your idea is preserved below; the local starter is available.') from None
+            raise BuilderError("Gemini quota exceeded.") from None
+
+        raise BuilderError("Gemini could not process the request.") from None
     except (URLError, TimeoutError, OSError):
         raise BuilderError('Gemini could not be reached. Your idea is preserved below; try the local starter.') from None
     except (ValueError, KeyError, IndexError, TypeError, AttributeError, RecursionError):
