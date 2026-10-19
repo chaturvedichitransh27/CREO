@@ -5,6 +5,10 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.db.models.deletion import ProtectedError
 from django.shortcuts import get_object_or_404, redirect, render
+from django.core.paginator import Paginator
+from django.views.decorators.cache import never_cache
+from django.views.decorators.vary import vary_on_headers
+from django.views.decorators.http import require_http_methods
 from . import ai
 from .forms import BriefForm, BuilderForm
 from .models import Brief
@@ -95,9 +99,40 @@ def builder(request):
 
 
 @brand_required
+@never_cache
+@vary_on_headers('HX-Request')
+@require_http_methods(['GET', 'POST'])
 def matches(request, pk):
     from creators.views import public_profiles
     from discovery.matching import rank_creators
+    from discovery.semantic import refresh_insights
+    from .forms import SemanticMatchForm, MatchFilterForm
+    from django.utils import timezone
     brief = owned_brief(request, pk)
-    matches = rank_creators(brief, public_profiles())
-    return render(request, 'briefs/matches.html', {'brief': brief, 'matches': matches})
+    profiles = list(public_profiles())
+    semantic_form = SemanticMatchForm(request.POST if request.method == 'POST' else None)
+    if request.method == 'POST' and semantic_form.is_valid():
+        try:
+            baseline = rank_creators(brief, profiles, use_ai=False)
+            count, reused = refresh_insights(brief, [m['profile'] for m in baseline], request.user)
+            messages.success(request, f'{count} creators have current semantic insights' + (' (cached).' if reused else '.'))
+            return redirect('brief_matches', pk=pk)
+        except ai.BuilderError as exc:
+            semantic_form.add_error(None, str(exc))
+    ranked = rank_creators(brief, profiles)
+    filters = MatchFilterForm(request.GET)
+    total = len(ranked)
+    if filters.is_valid():
+        minimum = filters.cleaned_data.get('min_score') or 0
+        ranked = [m for m in ranked if m['score'] >= minimum]
+        if filters.cleaned_data.get('available_only'):
+            ranked = [m for m in ranked if m['profile'].availability == 'AVAILABLE' and (not m['profile'].available_from or m['profile'].available_from <= timezone.localdate())]
+    else:
+        ranked = []
+    page = Paginator(ranked, 12).get_page(request.GET.get('page'))
+    params = request.GET.copy()
+    params.pop('page', None)
+    template = 'briefs/match_results.html' if request.method == 'GET' and request.headers.get('HX-Request') == 'true' else 'briefs/matches.html'
+    return render(request, template, {'brief': brief, 'matches': page.object_list, 'page_obj': page,
+        'filter_query': params.urlencode(), 'filters': filters, 'total_creators': total,
+        'semantic_form': semantic_form, 'gemini_ready': ai.is_configured()})

@@ -4,7 +4,8 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
-from .matching import score_creator, commercial_warnings
+from .matching import rank_creators, commercial_warnings
+from django.views.decorators.cache import never_cache
 
 
 def selected_ids(request):
@@ -37,6 +38,7 @@ def update(request, pk):
     return redirect(destination)
 
 
+@never_cache
 def compare(request):
     from creators.views import public_profiles
     profiles = list(public_profiles().filter(pk__in=selected_ids(request)))
@@ -51,11 +53,9 @@ def compare(request):
             from django.http import Http404
             raise Http404
         brief = get_object_or_404(Brief.objects.prefetch_related('tools', 'skills', 'specializations'), pk=int(value), brand=request.user)
-    cards = []
+    cards = rank_creators(brief, profiles) if brief else []
     for profile in profiles:
-        if brief:
-            cards.append(score_creator(brief, profile))
-        else:
+        if not brief:
             items = list(profile.portfolio_items.all())
             cards.append({'profile': profile, 'items': items, 'warnings': commercial_warnings(None, profile, items)})
     briefs = request.user.briefs.exclude(status='ARCHIVED') if request.user.is_authenticated and request.user.role == 'BRAND' else []

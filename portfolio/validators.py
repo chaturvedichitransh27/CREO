@@ -29,6 +29,7 @@ def validate_video_url(value):
     video_embed_url(value)
 
 def validate_image(value):
+    opened_here = getattr(value, 'closed', False)
     if value.size > 5 * 1024 * 1024:
         raise ValidationError('Images must be 5 MB or smaller.')
     try:
@@ -43,3 +44,5 @@ def validate_image(value):
         raise ValidationError('Please upload a valid image.')
     finally:
         value.seek(0)
+        if opened_here:
+            value.close()

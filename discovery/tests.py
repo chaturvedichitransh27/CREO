@@ -16,20 +16,20 @@ class DiscoveryTests(TestCase):
     def setUp(self):
         self.brand = User.objects.create_user(username='brand', email='brand@example.com', role='BRAND')
         self.creator = User.objects.create_user(username='maker', email='maker@example.com')
-        self.profile = CreatorProfile.objects.create(user=self.creator, display_name='A Maker', availability='AVAILABLE')
+        self.profile = CreatorProfile.objects.create(user=self.creator, display_name='A Maker', availability='AVAILABLE', price_min=100, price_max=300, turnaround_days=5, experience_years=4)
         self.tool = Tool.objects.create(name='Runway')
         self.skill = Skill.objects.create(name='Art direction')
         self.specialty = Specialization.objects.create(name='Product campaigns')
         self.profile.tools.add(self.tool)
         self.profile.skills.add(self.skill)
         self.profile.specializations.add(self.specialty)
-        self.item = PortfolioItem.objects.create(creator=self.profile, title='Coffee in motion', description='A coffee campaign',
+        self.item = PortfolioItem.objects.create(creator=self.profile, title='Coffee in motion', description='A coffee campaign with three images',
             video_url='https://vimeo.com/123456789', format='PRODUCT', aspect_ratio='1:1', style='Sculptural product',
             workflow='Create original source imagery, animate, and finish.', licensing_notes='Original sources, terms to confirm.')
         self.item.tools.add(self.tool)
         self.brief = Brief.objects.create(brand=self.brand, title='Coffee launch', description='Coffee campaign', deliverables='Three images',
             content_type='PRODUCT', style='Sculptural product', aspect_ratio='1:1', budget_min=100, budget_max=500,
-            deadline=timezone.localdate() + timedelta(days=20), commercial_use=True, usage_requirements='Owned social for 3 months')
+            deadline=timezone.localdate() + timedelta(days=20), min_experience_years=3, commercial_use=True, usage_requirements='Owned social for 3 months')
         self.brief.tools.add(self.tool)
         self.brief.skills.add(self.skill)
         self.brief.specializations.add(self.specialty)
@@ -75,13 +75,13 @@ class DiscoveryTests(TestCase):
         self.item.tools.clear()
         result = score_creator(self.brief, self.profile)
         tools = next(r for r in result['rows'] if r['label'] == 'Tools')
-        self.assertEqual(tools['earned'], 10)
-        self.assertEqual(result['score'], 90)
+        self.assertEqual(tools['earned'], 5)
+        self.assertEqual(result['score'], 95)
 
     def test_no_portfolio_never_gets_demonstrated_format_points(self):
         self.item.delete()
         result = score_creator(self.brief, self.profile)
-        self.assertEqual(result['score'], 40)
+        self.assertEqual(result['score'], 60)
         self.assertEqual(next(r for r in result['rows'] if r['label'] == 'Content type')['earned'], 0)
 
     def test_empty_optional_requirements_are_removed_from_denominator(self):
@@ -89,15 +89,16 @@ class DiscoveryTests(TestCase):
         self.brief.skills.clear()
         self.brief.specializations.clear()
         result = score_creator(self.brief, self.profile)
-        self.assertEqual(result['weight_total'], 55)
+        self.assertEqual(result['weight_total'], 73)
         self.assertEqual(result['score'], 100)
 
     def test_partial_style_and_unavailable_are_lower_scores(self):
         self.brief.style = 'Sculptural neon'
         self.profile.availability = 'UNAVAILABLE'
         result = score_creator(self.brief, self.profile)
-        self.assertEqual(next(r for r in result['rows'] if r['label'] == 'Visual style')['earned'], 7.5)
-        self.assertEqual(result['score'], 88)
+        self.assertEqual(next(r for r in result['rows'] if r['label'] == 'Visual style')['earned'], 5)
+        self.assertEqual(result['score'], 75)
+        self.assertEqual(next(r for r in result['rows'] if r['label'] == 'Deadline')['earned'], 0)
 
     def test_restriction_missing_notes_and_demo_warning(self):
         self.item.licensing_notes = 'Personal use only; non-commercial.'
@@ -115,8 +116,8 @@ class DiscoveryTests(TestCase):
             CreatorProfile.objects.create(user=user, display_name=f'Creator {i}')
         with CaptureQueriesContext(connection) as queries:
             first = rank_creators(self.brief, public_profiles())
-        # Evidence adds one batched query, independent of creator count.
-        self.assertLessEqual(len(queries), 10)
+        # Portfolio evidence and semantic cache each add a single batched query.
+        self.assertLessEqual(len(queries), 11)
         second = rank_creators(self.brief, public_profiles())
         self.assertEqual([(r['profile'].pk, r['score']) for r in first], [(r['profile'].pk, r['score']) for r in second])
         self.assertEqual(first[0]['profile'], self.profile)

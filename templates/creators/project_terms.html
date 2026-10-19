@@ -1,0 +1,6 @@
+<div class="project-terms"><span class="eyebrow">PROJECT TERMS · SELF-REPORTED</span>
+<p>{% if profile.price_min %}{{ profile.currency }} {{ profile.price_min }}–{{ profile.price_max }} per typical project{% else %}Project pricing not supplied{% endif %}</p>
+<p>{% if profile.turnaround_days %}Typical turnaround: {{ profile.turnaround_days }} calendar days{% else %}Turnaround not supplied{% endif %}</p>
+{% if profile.available_from %}<p>Earliest start: {{ profile.available_from|date:'M j, Y' }}</p>{% endif %}
+{% if profile.experience_years != None %}<p>{{ profile.experience_years }} years of relevant creative experience</p>{% endif %}
+<p class="help-text">Confirm a quote and schedule for your specific scope.</p></div>

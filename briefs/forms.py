@@ -8,7 +8,7 @@ class BriefForm(forms.ModelForm):
         model = Brief
         fields = ['title', 'description', 'audience', 'deliverables', 'content_type', 'style', 'aspect_ratio',
                   'budget_min', 'budget_max', 'currency', 'deadline', 'commercial_use', 'usage_requirements',
-                  'skills', 'tools', 'specializations', 'status']
+                  'skills', 'tools', 'specializations', 'min_experience_years', 'status']
         widgets = {
             'description': forms.Textarea(attrs={'rows': 5}), 'deliverables': forms.Textarea(attrs={'rows': 3}),
             'usage_requirements': forms.Textarea(attrs={'rows': 3}), 'deadline': forms.DateInput(attrs={'type': 'date'}),
@@ -38,3 +38,13 @@ class BuilderForm(forms.Form):
         if data.get('mode') == 'gemini' and not data.get('consent'):
             self.add_error('consent', 'Confirm before sending your idea to Gemini, or use the local starter.')
         return data
+
+
+class SemanticMatchForm(forms.Form):
+    consent = forms.BooleanField(label='Send this brief’s creative requirements and public portfolio text to Google Gemini.',
+        help_text='Up to 20 leading creators, six projects each. Private evidence and account details are excluded. Free-tier input may be used by Google to improve products.')
+
+
+class MatchFilterForm(forms.Form):
+    min_score = forms.IntegerField(required=False, min_value=0, max_value=100, label='Minimum compatibility', initial=0)
+    available_only = forms.BooleanField(required=False, label='Available now only')

@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.core.exceptions import ValidationError
-from django.core.validators import MinValueValidator
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.urls import reverse
 from portfolio.models import PortfolioItem
@@ -29,6 +29,7 @@ class Brief(models.Model):
     budget_max = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(1)])
     currency = models.CharField(max_length=3, choices=[('INR', 'INR'), ('USD', 'USD'), ('EUR', 'EUR'), ('GBP', 'GBP')], default='INR')
     deadline = models.DateField()
+    min_experience_years = models.PositiveSmallIntegerField(null=True, blank=True, validators=[MaxValueValidator(60)], help_text='Optional minimum relevant creative experience. Leave blank for no preference.')
     commercial_use = models.BooleanField(default=True)
     usage_requirements = models.TextField(max_length=2000, blank=True, help_text='Channels, territories, duration, exclusivity, and any source or release requirements.')
     skills = models.ManyToManyField('creators.Skill', blank=True, related_name='briefs')
@@ -44,6 +45,7 @@ class Brief(models.Model):
         constraints = [
             models.CheckConstraint(condition=models.Q(budget_min__gte=1), name='brief_positive_budget'),
             models.CheckConstraint(condition=models.Q(budget_max__gte=models.F('budget_min')), name='brief_budget_order'),
+            models.CheckConstraint(condition=models.Q(min_experience_years__isnull=True) | models.Q(min_experience_years__lte=60), name='brief_valid_experience'),
         ]
 
     def __str__(self):
@@ -67,3 +69,11 @@ class GenerationUsage(models.Model):
     day = models.DateField()
     attempts = models.PositiveSmallIntegerField(default=0)
     last_attempt = models.DateTimeField(null=True)
+
+
+class SemanticMatchCache(models.Model):
+    """One bounded, expiring set of AI insights per private brief, shared by workers."""
+    brief = models.OneToOneField(Brief, on_delete=models.CASCADE, primary_key=True, related_name='semantic_cache')
+    fingerprint = models.CharField(max_length=64)
+    results = models.JSONField(default=dict)
+    expires_at = models.DateTimeField(db_index=True)
