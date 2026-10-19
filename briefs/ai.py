@@ -109,7 +109,9 @@ def generate_draft(idea):
     payload = {'systemInstruction': {'parts': [{'text': instruction}]},
                'contents': [{'role': 'user', 'parts': [{'text': idea}]}],
                'generationConfig': {'temperature': 0.2, 'maxOutputTokens': 4096,
-                                    'responseFormat': {'text': {'mimeType': 'application/json', 'schema': SCHEMA}}}}
+                                    'responseMimeType': 'application/json',
+                                    'responseSchema': SCHEMA 
+               }}
     request = Request(f'https://generativelanguage.googleapis.com/v1beta/models/{settings.GEMINI_MODEL}:generateContent',
                       data=json.dumps(payload).encode(), method='POST',
                       headers={'Content-Type': 'application/json', 'x-goog-api-key': settings.GEMINI_API_KEY})
