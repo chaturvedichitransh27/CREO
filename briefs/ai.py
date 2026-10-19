@@ -1,6 +1,9 @@
 """Small, bounded Gemini REST adapter. No SDK, background worker, or paid fallback."""
 import json
 import re
+import logging
+
+logger = logging.getLogger(__name__)
 from datetime import date, timedelta
 from decimal import Decimal, InvalidOperation
 from urllib.error import HTTPError, URLError
