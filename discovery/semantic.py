@@ -88,8 +88,12 @@ def request_insights(brief, supplied):
     data['brief'].update({k: [v.name for v in getattr(brief, k).all()] for k in ['skills', 'specializations']})
     payload = {'systemInstruction': {'parts': [{'text': instruction}]},
                'contents': [{'role': 'user', 'parts': [{'text': json.dumps(data)}]}],
-               'generationConfig': {'temperature': 0, 'maxOutputTokens': 8192,
-                                    'responseFormat': {'text': {'mimeType': 'application/json', 'schema': SCHEMA}}}}
+               'generationConfig': {
+                    'temperature': 0,
+                    'maxOutputTokens': 8192,
+                    'responseMimeType': 'application/json',
+                    'responseSchema': SCHEMA
+                }}              
     req = Request(f'https://generativelanguage.googleapis.com/v1beta/models/{settings.GEMINI_MODEL}:generateContent',
                   data=json.dumps(payload).encode(), method='POST', headers={'Content-Type': 'application/json', 'x-goog-api-key': settings.GEMINI_API_KEY})
     try:
