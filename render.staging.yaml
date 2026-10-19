@@ -1,4 +1,6 @@
-# Independent staging resources only. Never point these at the production database.
+# Disposable staging only. SQLite data resets when Render replaces the instance.
+# This avoids the workspace's one-free-Postgres limit; CI also tests PostgreSQL.
+# Never point this service at the production database.
 services:
   - type: web
     name: creo-smart-matching-staging
@@ -17,9 +19,7 @@ services:
       - key: DJANGO_SECRET_KEY
         generateValue: true
       - key: DATABASE_URL
-        fromDatabase:
-          name: creo-smart-matching-staging-db
-          property: connectionString
+        value: sqlite:////tmp/creo-smart-matching-staging.sqlite3
       - key: DATABASE_MEDIA
         value: 'True'
       - key: SEED_DEMO
@@ -28,9 +28,3 @@ services:
         value: '*'
       - key: GEMINI_FREE_TIER_CONFIRMED
         value: 'False'
-databases:
-  - name: creo-smart-matching-staging-db
-    plan: free
-    databaseName: creo_staging
-    user: creo_staging
-    ipAllowList: []
