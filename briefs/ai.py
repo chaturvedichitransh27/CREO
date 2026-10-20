@@ -139,8 +139,8 @@ def reserve_attempt(user):
     ):
         raise BuilderError(
             'Generation limit reached. '
-            'Wait 30 seconds between attempts; '
-            'up to 10 attempts per day. '
+            f'Wait {settings.GEMINI_COOLDOWN_SECONDS} seconds between attempts; '
+            f'up to {settings.GEMINI_DAILY_LIMIT} attempts per day. '
             'You can still use the local starter.'
         )
 
@@ -399,15 +399,9 @@ def generate_draft(idea):
 
     except HTTPError as exc:
 
-        error_details = exc.read(2000).decode(
-            'utf-8',
-            errors='replace'
-        )
-
         logger.error(
-            'Gemini API ERROR: HTTP %s - %s',
+            'Gemini API ERROR: HTTP %s',
             exc.code,
-            error_details
         )
 
         if exc.code == 429:

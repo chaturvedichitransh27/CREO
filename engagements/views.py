@@ -63,5 +63,10 @@ def detail(request, pk):
         else:
             messages.success(request, 'Engagement updated. Both workspaces now show the new status.')
             return redirect(engagement)
-    return render(request, 'engagements/detail.html', {'engagement': engagement, 'form': form, 'choices': choices,
+    from studio.models import Moodboard
+    from studio.views import can_view_approved
+    approved_moodboard = Moodboard.objects.filter(brief=engagement.brief, approved_at__isnull=False).first()
+    if approved_moodboard and not can_view_approved(request.user, approved_moodboard):
+        approved_moodboard = None
+    return render(request, 'engagements/detail.html', {'engagement': engagement, 'form': form, 'choices': choices, 'approved_moodboard': approved_moodboard,
                   'events': engagement.events.select_related('actor'), 'snapshot': engagement.brief_snapshot})

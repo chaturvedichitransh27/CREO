@@ -1,0 +1,8 @@
+{% extends 'studio/base.html' %}
+{% block title %}{{ snapshot.title }} — Approved direction{% endblock %}
+{% block studio_content %}
+<div class="studio-board-heading"><div><span class="eyebrow">APPROVED CREATIVE DIRECTION / REVISION {{ board.approved_revision }}</span><h1>{{ snapshot.title }}</h1><p class="studio-style">{{ snapshot.visual_style }}</p></div><span class="status-pill">Read-only snapshot</span></div>
+<p class="notice">Approved {{ board.approved_at|date:'M j, Y, H:i' }}. This is the latest approved visual direction, separate from the original invitation’s brief snapshot. Confirm any scope changes with the brand.</p>
+<div class="studio-canvas">{% include 'studio/cards.html' %}</div>
+{% if user.pk == board.owner_id %}<a class="button button-outline spaced" href="{{ board.get_absolute_url }}">Return to your draft ↗</a>{% else %}<a class="button button-outline spaced" href="{% url 'engagement_inbox' %}">Back to engagements ↗</a>{% endif %}
+{% endblock %}

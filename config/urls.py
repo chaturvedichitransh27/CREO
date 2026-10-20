@@ -16,6 +16,7 @@ urlpatterns = [
     path('briefs/', include('briefs.urls')),
     path('evidence/', include('trust.urls')),
     path('engagements/', include('engagements.urls')),
+    path('studio/', include('studio.urls')),
     path('api/taxonomy/', views.taxonomy, name='taxonomy'),
 ]
 from config.views import public_media, health

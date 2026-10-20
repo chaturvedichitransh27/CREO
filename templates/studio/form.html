@@ -1,0 +1,5 @@
+{% extends 'studio/base.html' %}
+{% block studio_content %}
+<a class="back-link" href="{{ board.get_absolute_url }}">← {{ board.title }}</a><div class="studio-intro"><span class="eyebrow">BUILD YOUR VISUAL LANGUAGE</span><h1>{{ heading }}<span class="serif">.</span></h1><p class="lead">Save your changes to return to the board. Your approved snapshot stays unchanged until you approve again.</p></div>
+<form class="form-panel studio-edit-form" method="post" enctype="multipart/form-data">{% csrf_token %}{% include 'form_fields.html' %}<div class="studio-form-actions"><button class="button" type="submit">{{ button }} →</button><a href="{{ board.get_absolute_url }}">Cancel</a></div></form>
+{% endblock %}

@@ -1,0 +1,5 @@
+{% extends 'studio/base.html' %}
+{% block studio_content %}
+<a class="back-link" href="{{ board.get_absolute_url }}">← {{ board.title }}</a><div class="studio-intro"><span class="eyebrow">MAKE THE DIRECTION ACTIONABLE</span><h1>Your vision.<br><span class="serif">A clear brief.</span></h1><p class="lead">Your cards are an editable starting point. Set real project terms before matching. Nothing is sent to creators until you invite them and approve the moodboard.</p></div>
+<form class="form-panel studio-edit-form" method="post">{% csrf_token %}{{ revision_form }}{% include 'form_fields.html' %}<button class="button" type="submit">Save brief & return to board →</button></form>
+{% endblock %}

@@ -398,15 +398,9 @@ def request_insights(brief, supplied):
 
     except HTTPError as exc:
 
-        error_details = exc.read(2000).decode(
-            'utf-8',
-            errors='replace'
-        )
-
         logger.error(
-            'Semantic Gemini API ERROR: HTTP %s - %s',
+            'Semantic Gemini API ERROR: HTTP %s',
             exc.code,
-            error_details
         )
 
         if exc.code == 429:
@@ -428,7 +422,7 @@ def request_insights(brief, supplied):
 
     except (URLError, TimeoutError, OSError):
 
-        logger.exception(
+        logger.warning(
             'Semantic Gemini connection failed'
         )
 

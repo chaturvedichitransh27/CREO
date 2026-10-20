@@ -174,7 +174,8 @@ class GeminiAdapterTests(TestCase):
         self.assertEqual(ai.generate_draft('A fictional campaign idea.'), self.draft())
         request = network.call_args.args[0]
         payload = json.loads(request.data)
-        self.assertIn('responseFormat', payload['generationConfig'])
+        self.assertEqual(payload['generationConfig']['responseMimeType'], 'application/json')
+        self.assertEqual(payload['generationConfig']['responseSchema'], ai.SCHEMA)
         self.assertNotIn('test-only-secret', request.full_url)
         self.assertEqual(request.get_header('X-goog-api-key'), 'test-only-secret')
         self.assertEqual(network.call_args.kwargs['timeout'], 20)
@@ -219,6 +220,7 @@ class GeminiAdapterTests(TestCase):
             ai.generate_draft('A fictional idea.')
         network.assert_not_called()
 
+    @override_settings(GEMINI_DAILY_LIMIT=10, GEMINI_COOLDOWN_SECONDS=30)
     def test_daily_quota_and_next_day_reset(self):
         user = User.objects.create_user(username='quota', email='quota@example.com', role='BRAND')
         usage = GenerationUsage.objects.create(user=user, day=timezone.localdate(), attempts=10,

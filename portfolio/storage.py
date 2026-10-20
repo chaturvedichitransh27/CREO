@@ -42,6 +42,6 @@ class DatabaseMediaStorage(Storage):
             raise FileNotFoundError(name)
 
     def url(self, name):
-        if name.startswith('evidence/'):
-            raise ValueError('Evidence has no public URL. Use its authenticated download route.')
+        if name.startswith(('evidence/', 'studio/')):
+            raise ValueError('Private uploads have no public URL. Use their authenticated route.')
         return settings.MEDIA_URL + quote(name)

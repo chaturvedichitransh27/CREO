@@ -1,0 +1,7 @@
+{% extends 'base.html' %}{% load static %}
+{% block extra_head %}<link rel="stylesheet" href="{% static 'css/studio.css' %}">{% endblock %}
+{% block title %}Creative Studio — CREO{% endblock %}
+{% block content %}<section class="container studio">
+<nav class="studio-nav" aria-label="Creative Studio"><a href="{% url 'studio:index' %}">✳ CREATIVE STUDIO</a><a href="{% url 'dashboard' %}">Brand workspace ↗</a></nav>
+{% block studio_content %}{% endblock %}
+</section>{% endblock %}
