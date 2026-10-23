@@ -1,0 +1,20 @@
+{% load static %}
+<section class="hero container premium-hero">
+  <div class="hero-copy">
+    <div class="eyebrow hero-badge"><span aria-hidden="true">ϟ</span> AI-POWERED CREATIVE COLLABORATION</div>
+    <h1>Turn Ideas into<br><span class="gradient-text">Extraordinary</span><br>Content.</h1>
+    <p>Connect with talented AI creators, build your visual direction, and bring your vision to life — together.</p>
+    <div class="hero-actions"><a class="button" href="{% url 'directory' %}">Explore Creators <span aria-hidden="true">→</span></a><a class="button button-outline" href="{% url 'register' %}?role=CREATOR">I’m a Creator</a></div>
+    <div class="hero-proof"><div><strong>{{ creator_count }}</strong><span>Creator profile{{ creator_count|pluralize }}</span></div><div><strong>3</strong><span>Compare side by side</span></div><div><strong>One place</strong><span>From brief to delivery</span></div></div>
+    <p class="hero-disclosure">Explore the collective. Fictional demo profiles are clearly labeled.</p>
+  </div>
+  <div class="hero-composition" aria-label="Illustrated creative direction, discovery and collaboration">
+    <div class="composition-orbit" aria-hidden="true"></div>
+    <div class="concept-back concept-back-two" aria-hidden="true"><img src="{% static 'img/demo-04-1.jpg' %}" alt=""></div>
+    <div class="concept-back" aria-hidden="true"><img src="{% static 'img/hero.jpg' %}" alt=""></div>
+    <div class="concept-main"><div class="concept-sky" aria-hidden="true"><span class="concept-sun"></span><span class="concept-leaf leaf-one"></span><span class="concept-leaf leaf-two"></span><span class="concept-rock"></span><span class="concept-bottle"><i></i><b>FORM</b><small>THE EVERYDAY / REIMAGINED</small></span></div><div class="concept-caption"><strong>Concept 01</strong><span>Nature · Modern · Sculptural</span><small>Decorative illustration · not generated output</small></div></div>
+    <div class="idea-float"><span class="idea-label">CREATIVE DIRECTION → VISUALS</span><p>A fresh perspective.<br><strong>An extraordinary starting point.</strong><span aria-hidden="true">↗</span></p><div class="idea-swatches" aria-hidden="true"><img src="{% static 'img/demo-01-1.jpg' %}" alt=""><i></i><img src="{% static 'img/demo-03-0.jpg' %}" alt=""></div></div>
+    <span class="composition-note" aria-hidden="true">Ideas.<br>Visualised.<br><i>↴</i></span>
+    <div class="composition-info"><a href="{% url 'directory' %}" class="composition-tile"><span class="feature-icon" aria-hidden="true">{% include 'components/premium-icon.html' with icon='people' %}</span><div><strong>Find the Right Creator</strong><div class="hero-people">{% for profile in creators %}<span title="{{ profile.display_name }}">{{ profile.initials }}</span>{% endfor %}<span aria-hidden="true">↗</span></div><p>Match your brief to skills, style, budget and availability.</p></div></a><a href="{% url 'engagement_inbox' %}" class="composition-tile"><span class="feature-icon icon-blue" aria-hidden="true">{% include 'components/premium-icon.html' with icon='film' %}</span><div><strong>Collaborate & Create</strong><div class="mini-flow" aria-hidden="true"><span>▤</span><span>↗</span><span>▷</span></div><p>Invitations, revisions and delivery. All in one place.</p></div></a></div>
+  </div>
+</section>
