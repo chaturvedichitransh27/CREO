@@ -4,6 +4,8 @@
 <a class="back-link" href="{% url 'opportunities:manage' posting.pk %}">← {{ posting.title }}</a>
 <div class="eyebrow">CREO OPPORTUNITIES / PRIVATE TO YOUR BRAND</div><h1>The talent <span class="serif">behind it.</span></h1>
 <p class="lead">{{ page_obj.paginator.count }} applicant{{ page_obj.paginator.count|pluralize }} for {{ posting.title }}.</p>
+<form method="get" class="form-panel opp-filters">{% include 'form_fields.html' with form=filter_form %}<button class="button button-outline">Filter applicants</button></form>
+{% if posting.status != 'DRAFT' %}<form method="post" action="{% url 'opportunities:recommendations' posting.pk %}" class="form-actions">{% csrf_token %}<button class="button">Find My Top 5 Matches ↗</button></form>{% endif %}
 {% for application in page_obj %}<article class="brief-card opp-applicant">
 <div class="section-heading"><div><h2><a href="{{ application.creator.get_absolute_url }}">{{ application.creator.display_name }}</a></h2><p>{{ application.creator.headline }}</p></div><a class="button button-outline" href="{{ application.creator.get_absolute_url }}">Creator profile ↗</a></div>
 <div class="tags"><span>{{ application.get_status_display }}</span><span>{{ application.get_consideration_status_display }}</span><span>Applied {{ application.created_at|date:'M j, Y' }}</span></div>
@@ -11,8 +13,8 @@
 <h3>Tools</h3><div class="tags">{% for tool in application.creator.tools.all %}<span>{{ tool.name }}</span>{% empty %}<span>Not specified</span>{% endfor %}</div>
 <h3>Relevant portfolio work</h3><p class="help-text">Shared output format, style or required tools. This is not an AI ranking.</p><ul>{% for item in application.relevant_work %}<li><a href="{{ item.get_absolute_url }}">{{ item.title }} ↗</a></li>{% empty %}<li>No portfolio projects share the specified format, style or tools yet. Explore the creator’s profile for their full portfolio.</li>{% endfor %}</ul>
 <h3>Application message</h3><div class="opp-prose">{{ application.message|default:'No message provided.'|linebreaks }}</div>
-<p class="help-text">AI compatibility: Not evaluated.</p>
-</article>{% empty %}<div class="empty"><span class="empty-symbol">✧</span><h2>Room for your next great collaborator.</h2><p>No applications yet. Creator applications arrive in a future release. Your project details and applicant workspace are ready.</p><a class="button" href="{% url 'opportunities:manage' posting.pk %}">Review your project ↗</a></div>{% endfor %}
+<div class="form-actions"><a class="button button-outline" href="{{ application.get_absolute_url }}">Review application ↗</a>{% if application.status == 'SUBMITTED' %}<a class="button" href="{% url 'opportunities:considering' application.pk %}">Considering</a>{% endif %}</div>
+</article>{% empty %}<div class="empty"><span class="empty-symbol">✧</span><h2>Room for your next great collaborator.</h2><p>No applications yet for these filters. Publish your project to make it visible in Explore Opportunities.</p><a class="button" href="{% url 'opportunities:manage' posting.pk %}">Review your project ↗</a></div>{% endfor %}
 {% include 'opportunities/pagination.html' %}
-{% if page_obj %}<p class="help-text">Review actions and consideration notifications will be introduced with creator applications. Consideration never authorizes contact sharing.</p>{% endif %}
+<p class="help-text">Considering notifies the creator. Only explicitly authorized professional contact details are shared.</p>
 {% endblock %}

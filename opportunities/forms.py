@@ -57,3 +57,70 @@ class JobPostingForm(forms.ModelForm):
 class PostingActionForm(forms.Form):
     version = forms.IntegerField(min_value=0, widget=forms.HiddenInput)
     action = forms.ChoiceField(choices=[('close', 'Close'), ('reopen', 'Reopen')])
+
+
+class OpportunityFilterForm(forms.Form):
+    q = forms.CharField(required=False, max_length=140, label='Search projects', widget=forms.TextInput(attrs={'placeholder': 'Project, brand or creative direction'}))
+    work_type = forms.ChoiceField(required=False, choices=[('', 'Any creative work')] + list(JobPosting.WorkType.choices))
+    skill = forms.ModelChoiceField(required=False, queryset=JobPosting._meta.get_field('skills').related_model.objects.all())
+    tool = forms.ModelChoiceField(required=False, queryset=JobPosting._meta.get_field('tools').related_model.objects.all())
+    currency = forms.ChoiceField(required=False, choices=[('', 'Any currency')] + list(JobPosting._meta.get_field('currency').choices))
+    budget_min = forms.DecimalField(required=False, min_value=1, max_digits=10, decimal_places=2, label='Minimum budget ceiling')
+    budget_max = forms.DecimalField(required=False, min_value=1, max_digits=10, decimal_places=2, label='Maximum budget ceiling')
+    include_closed = forms.BooleanField(required=False, label='Include closed projects')
+
+    def clean(self):
+        data = super().clean()
+        if (data.get('budget_min') or data.get('budget_max')) and not data.get('currency'):
+            self.add_error('currency', 'Select a currency when filtering by budget.')
+        if data.get('budget_min') and data.get('budget_max') and data['budget_max'] < data['budget_min']:
+            self.add_error('budget_max', 'Maximum must be at least the minimum.')
+        return data
+
+
+class ContactConsentForm(forms.Form):
+    creator_email = forms.EmailField(required=False, label='Professional email (optional)', help_text='Enter the address you choose to share. Your login email is never filled in automatically.')
+    share_email = forms.BooleanField(required=False, label='Share this email with this brand only if it considers or shortlists me.')
+    creator_phone = forms.RegexField(r'^\+?[0-9 ()\-]{7,30}$', required=False, max_length=30, label='Professional phone (optional)')
+    share_phone = forms.BooleanField(required=False, label='Share this phone with this brand only if it considers or shortlists me.')
+    version = forms.IntegerField(min_value=0, widget=forms.HiddenInput, initial=0)
+
+    def clean(self):
+        data = super().clean()
+        for field, flag in [('creator_email', 'share_email'), ('creator_phone', 'share_phone')]:
+            if data.get(flag) and not data.get(field):
+                self.add_error(field, 'Enter the professional contact you authorize for sharing.')
+            if not data.get(flag):
+                data[field] = ''  # Do not retain unapproved personal details.
+        return data
+
+
+class ApplicationForm(ContactConsentForm):
+    message = forms.CharField(required=False, max_length=3000, label='Your application message', widget=forms.Textarea(attrs={'rows': 4}), help_text='Describe your fit. Keep private contact details out of this message; use the consent controls below.')
+
+
+class ConsideringForm(forms.Form):
+    brand_email = forms.EmailField(label='Your professional contact email')
+    brand_share_email = forms.BooleanField(label='Share this professional email with this applicant while they are considered or shortlisted.')
+    version = forms.IntegerField(min_value=0, widget=forms.HiddenInput)
+
+
+class BrandContactForm(forms.Form):
+    brand_email = forms.EmailField(required=False, label='Professional email')
+    brand_share_email = forms.BooleanField(required=False, label='Share this email with this applicant while considered or shortlisted.')
+    version = forms.IntegerField(min_value=0, widget=forms.HiddenInput)
+
+    def clean(self):
+        data = super().clean()
+        if data.get('brand_share_email') and not data.get('brand_email'):
+            self.add_error('brand_email', 'Enter the email you authorize for sharing.')
+        if not data.get('brand_share_email'):
+            data['brand_email'] = ''
+        return data
+
+
+class ApplicantFilterForm(forms.Form):
+    q = forms.CharField(required=False, max_length=120, label='Creator name')
+    status = forms.ChoiceField(required=False, choices=[('', 'All applications'), ('SUBMITTED', 'Submitted'), ('WITHDRAWN', 'Withdrawn')])
+    review = forms.ChoiceField(required=False, choices=[('', 'All review states'), ('UNREVIEWED', 'Not reviewed'), ('CONSIDERING', 'Considering'), ('shortlisted', 'All shortlisted')])
+    sort = forms.ChoiceField(required=False, choices=[('', 'Newest first'), ('oldest', 'Oldest first'), ('name', 'Creator name')])

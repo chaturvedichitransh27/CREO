@@ -26,3 +26,9 @@
   .opportunities .section-heading { align-items: flex-start; flex-direction: column; gap: 16px; }
   .opportunities .opp-toolbar { align-items: stretch; }
 }
+
+.opportunities .opp-filters { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px 22px; margin: 24px 0; }
+.opportunities .opp-filters .form-actions, .opportunities .opp-filters .form-error { grid-column: 1 / -1; }
+.opportunities .opp-filters > button { align-self: end; }
+.opportunities .opp-applicant li { overflow-wrap: anywhere; }
+@media (max-width: 760px) { .opportunities .opp-filters { grid-template-columns: minmax(0, 1fr); } }

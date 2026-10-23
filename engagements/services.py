@@ -25,7 +25,7 @@ def snapshot(brief):
 
 
 def participant_role(engagement, user):
-    if user.role == 'BRAND' and engagement.brief.brand_id == user.pk:
+    if user.role == 'BRAND' and engagement.brand_id == user.pk:
         return 'BRAND'
     if user.role == 'CREATOR' and engagement.creator.user_id == user.pk:
         return 'CREATOR'

@@ -1,0 +1,2 @@
+{% extends 'opportunities/base.html' %}{% block title %}{{ heading }} — CREO{% endblock %}
+{% block opportunity_content %}<a class="back-link" href="{{ posting.get_absolute_url }}">← {{ posting.title }}</a><div class="eyebrow">CREO / {{ posting.brand_name }}</div><h1>{{ heading }}</h1><p class="lead">{{ description }}</p><form method="post" class="form-panel opp-form">{% csrf_token %}{% include 'form_fields.html' %}<button type="submit" class="button">{{ button }} ↗</button></form>{% endblock %}

@@ -13,7 +13,8 @@ class Engagement(models.Model):
         COMPLETED = 'COMPLETED', 'Completed'
         CANCELLED = 'CANCELLED', 'Cancelled'
 
-    brief = models.ForeignKey('briefs.Brief', on_delete=models.PROTECT, related_name='engagements')
+    brief = models.ForeignKey('briefs.Brief', on_delete=models.PROTECT, related_name='engagements', null=True, blank=True)
+    posting = models.ForeignKey('opportunities.JobPosting', on_delete=models.PROTECT, related_name='engagements', null=True, blank=True)
     creator = models.ForeignKey('creators.CreatorProfile', on_delete=models.PROTECT, related_name='engagements')
     brief_snapshot = models.JSONField(default=dict, editable=False)
     message = models.TextField(max_length=2000)
@@ -25,7 +26,17 @@ class Engagement(models.Model):
 
     class Meta:
         ordering = ['-updated_at', '-pk']
-        constraints = [models.UniqueConstraint(fields=['brief', 'creator'], name='one_invitation_per_brief_creator')]
+        constraints = [models.UniqueConstraint(fields=['brief', 'creator'], name='one_invitation_per_brief_creator'),
+                       models.UniqueConstraint(fields=['posting', 'creator'], name='one_invitation_per_job_creator'),
+                       models.CheckConstraint(condition=(models.Q(brief__isnull=False, posting__isnull=True) | models.Q(brief__isnull=True, posting__isnull=False)), name='engagement_one_source')]
+
+    @property
+    def brand_id(self):
+        return self.posting.brand_id if self.posting_id else self.brief.brand_id
+
+    @property
+    def brand_display_name(self):
+        return self.brief_snapshot.get('brand_name', self.posting.brand_name) if self.posting_id else (self.brief.brand.first_name or self.brief.brand.username)
 
     def get_absolute_url(self):
         return reverse('engagement_detail', args=[self.pk])

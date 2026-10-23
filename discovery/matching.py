@@ -7,7 +7,7 @@ from decimal import Decimal, ROUND_HALF_UP
 from django.core.cache import cache
 from django.utils import timezone
 
-VERSION = 'smart-match-2.0'
+VERSION = 'smart-match-2.0-optional-format'
 WEIGHTS = {'Skills': 12, 'Tools': 10, 'Content type': 10, 'Aspect ratio': 5,
            'Visual style': 10, 'Specializations': 5, 'Budget': 12, 'Deadline': 10,
            'Availability': 8, 'Experience': 8, 'Creative relevance': 10}
@@ -97,12 +97,14 @@ def score_creator(brief, profile, requirements=None, insight=None):
         if warning:
             missing.append(warning)
 
-    formats = [i for i in items if i.format == brief.content_type]
+    formats = [i for i in items if i.format == brief.content_type] if brief.content_type else items
     aspect = [i for i in formats if i.aspect_ratio == brief.aspect_ratio]
-    row('Content type', bool(formats), f'{len(formats)} portfolio projects list {brief.get_content_type_display()}.',
-        warning=None if formats else 'No portfolio project demonstrates the requested content type.')
-    row('Aspect ratio', bool(aspect), f'{len(aspect)} projects combine the requested format and {brief.aspect_ratio}.',
-        warning=None if aspect else 'No project combines the requested format and aspect ratio.')
+    if brief.content_type:
+        row('Content type', bool(formats), f'{len(formats)} portfolio projects list {brief.get_content_type_display()}.',
+            warning=None if formats else 'No portfolio project demonstrates the requested content type.')
+    if brief.aspect_ratio:
+        row('Aspect ratio', bool(aspect), f'{len(aspect)} projects combine the requested format and {brief.aspect_ratio}.',
+            warning=None if aspect else 'No project combines the requested format and aspect ratio.')
     if brief.style.strip():
         style = max((overlap(brief.style, i.style) for i in formats), default=0)
         row('Visual style', style, 'Style terms and a small synonym dictionary, within the requested content type. No image analysis.',

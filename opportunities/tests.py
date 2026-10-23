@@ -268,9 +268,9 @@ class PostingSecurityTests(OpportunityTestCase):
                 form = JobPostingForm(self.payload(**overrides), instance=JobPosting(brand=self.brand))
                 self.assertFalse(form.is_valid())
 
-    def test_no_creator_application_or_directory_endpoint(self):
+    def test_creator_discovery_does_not_allow_applying_to_drafts(self):
         self.client.force_login(self.creator_user)
-        self.assertEqual(self.client.get('/opportunities/').status_code, 404)
+        self.assertNotContains(self.client.get('/opportunities/'), self.posting.title)
         self.assertEqual(self.client.post(f'/opportunities/{self.posting.pk}/apply/').status_code, 404)
         self.assertFalse(Application.objects.exists())
 
@@ -350,7 +350,7 @@ class ApplicantArchitectureTests(OpportunityTestCase):
         relevant = PortfolioItem.objects.create(creator=self.creator, title='Relevant work', description='Public work', format='FILM', aspect_ratio='16:9')
         relevant.tools.add(self.tool)
         response = self.client.get(self.url('applicants'))
-        for value in ['Public Creative Name', self.skill.name, self.tool.name, 'Relevant work', 'A private proposal', 'Submitted', 'Not reviewed', 'Not evaluated']:
+        for value in ['Public Creative Name', self.skill.name, self.tool.name, 'Relevant work', 'A private proposal', 'Submitted', 'Not reviewed', 'Find My Top 5 Matches']:
             self.assertContains(response, value)
         for value in [self.creator_user.email, self.brand.email, 'mailto:', 'tel:']:
             self.assertNotContains(response, value)

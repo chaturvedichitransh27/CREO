@@ -1,0 +1,10 @@
+{% extends 'opportunities/base.html' %}
+{% block title %}Explore Opportunities — CREO{% endblock %}
+{% block opportunity_content %}
+<div class="eyebrow">CREO OPPORTUNITIES / YOUR NEXT CREATIVE CHAPTER</div>
+<div class="section-heading"><div><h1>Find your next <span class="serif">project.</span></h1><p class="lead">Real briefs. New creative partners. Explore projects published by brands across CREO.</p></div>{% if user.role == 'CREATOR' %}<a class="button button-outline" href="{% url 'opportunities:my_applications' %}">My applications ↗</a>{% endif %}</div>
+<form method="get" class="form-panel opp-filters">{% include 'form_fields.html' with form=filter_form %}<div class="form-actions"><button class="button">Find projects</button><a href="{% url 'opportunities:explore' %}">Clear filters</a></div></form>
+<p class="help-text">{{ page_obj.paginator.count }} project{{ page_obj.paginator.count|pluralize }}. Open applications shown by default. Budget filters compare the upper budget amount in your selected currency.</p>
+<div class="brief-grid">{% for posting in page_obj %}{% include 'opportunities/public_card.html' %}{% empty %}<div class="empty"><h2>A new opportunity is on its way.</h2><p>No published projects match these filters. Try a broader search.</p></div>{% endfor %}</div>
+{% include 'opportunities/pagination.html' %}
+{% endblock %}

@@ -5,6 +5,8 @@ from django.db import transaction, IntegrityError
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.core.paginator import Paginator
+from django.views.decorators.cache import never_cache
 from briefs.models import Brief
 from briefs.views import brand_required, owned_brief
 from creators.models import CreatorProfile
@@ -40,15 +42,20 @@ def invite(request, brief_pk, creator_pk):
 
 
 def visible_engagements(user):
-    condition = Q(brief__brand=user) if user.role == 'BRAND' else Q(creator__user=user)
-    return Engagement.objects.filter(condition).select_related('brief__brand', 'creator__user')
+    condition = (Q(brief__brand=user) | Q(posting__brand=user)) if user.role == 'BRAND' else Q(creator__user=user)
+    return Engagement.objects.filter(condition).select_related('brief__brand', 'posting', 'creator__user')
 
 
+@never_cache
 @login_required
 def inbox(request):
-    return render(request, 'engagements/inbox.html', {'engagements': visible_engagements(request.user)})
+    from opportunities.models import Notification
+    notifications = Notification.objects.filter(recipient=request.user).select_related('application__posting', 'application__creator')
+    return render(request, 'engagements/inbox.html', {'engagements': visible_engagements(request.user),
+        'notifications': Paginator(notifications, 20).get_page(request.GET.get('notifications_page'))})
 
 
+@never_cache
 @login_required
 def detail(request, pk):
     engagement = get_object_or_404(visible_engagements(request.user), pk=pk)
@@ -65,8 +72,10 @@ def detail(request, pk):
             return redirect(engagement)
     from studio.models import Moodboard
     from studio.views import can_view_approved
-    approved_moodboard = Moodboard.objects.filter(brief=engagement.brief, approved_at__isnull=False).first()
+    approved_moodboard = Moodboard.objects.filter(brief=engagement.brief, approved_at__isnull=False).first() if engagement.brief_id else None
     if approved_moodboard and not can_view_approved(request.user, approved_moodboard):
         approved_moodboard = None
-    return render(request, 'engagements/detail.html', {'engagement': engagement, 'form': form, 'choices': choices, 'approved_moodboard': approved_moodboard,
+    from opportunities.models import Application
+    application = Application.objects.filter(posting_id=engagement.posting_id, creator_id=engagement.creator_id).first() if engagement.posting_id else None
+    return render(request, 'engagements/detail.html', {'engagement': engagement, 'form': form, 'choices': choices, 'approved_moodboard': approved_moodboard, 'application': application,
                   'events': engagement.events.select_related('actor'), 'snapshot': engagement.brief_snapshot})

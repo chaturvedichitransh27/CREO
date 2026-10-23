@@ -1,8 +1,10 @@
 {% extends 'opportunities/base.html' %}
 {% block title %}{{ posting.title }} — CREO Opportunities{% endblock %}
 {% block opportunity_content %}
-<a class="back-link" href="{% url 'home' %}">← CREO</a><div class="eyebrow">CREO OPPORTUNITIES / {{ posting.brand_name }}</div>
+<a class="back-link" href="{% url 'opportunities:explore' %}">← Explore Opportunities</a><div class="eyebrow">CREO OPPORTUNITIES / <a href="{% url 'opportunities:brand' posting.brand_id %}">{{ posting.brand_name }} ↗</a></div>
 <h1>{{ posting.title }}</h1><p class="lead">A creative project by {{ posting.brand_name }}</p><p><span class="status-pill">{{ posting.display_status }}</span></p>
-<div class="notice">{% if posting.accepting_applications %}This opportunity is published. Applying through CREO will become available in a future release.{% else %}Applications are closed for this project.{% endif %}</div>
+{% if posting.is_demo %}<div class="notice">Fictional demo brand and project. This is not a real hiring opportunity.</div>{% endif %}
+<div class="form-actions">{% if application %}<a class="button" href="{{ application.get_absolute_url }}">View my application · {{ application.get_status_display }}</a>{% elif posting.accepting_applications %}{% if not user.is_authenticated or user.role == 'CREATOR' %}<a class="button" href="{% url 'opportunities:apply' posting.pk %}">I'm Interested ↗</a>{% elif user.pk == posting.brand_id %}<a class="button" href="{% url 'opportunities:applicants' posting.pk %}">Manage Applicants ↗</a>{% endif %}{% endif %}</div>
+{% if not posting.accepting_applications %}<div class="notice">Applications are closed for this project.</div>{% endif %}
 {% include 'opportunities/requirements.html' %}
 {% endblock %}

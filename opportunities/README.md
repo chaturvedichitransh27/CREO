@@ -1,36 +1,66 @@
-# Opportunities, Phase 1
+# CREO Opportunities — marketplace integration
 
-Job postings are separate from private briefs. Only explicitly approved form data
-and the supplied public brand name appear publicly. Draft URLs return 404 even
-for their owner. Published jobs remain public when applications close. A deadline
-is inclusive in Asia/Kolkata; an expired open posting is effectively closed without
-requiring a scheduler. Reopening validates dates again. Drafts need only a title;
-publication requires project, output, budget and timing details. Optional taxonomies
-express no preference when empty. Editing public content requires fresh approval.
+Published open jobs appear automatically in `/opportunities/`; draft detail pages
+remain inaccessible publicly. New brands need no seeded account or separate profile.
+The public brand overview contains only published posting data and the explicit
+public brand name. All private routes are owner/participant scoped and uncached.
 
-All writes are owner-scoped, POST/CSRF protected, transactional and version-checked.
-The migration only creates new tables, constraints and indexes. Do not run it against
-production without deployment approval.
+## Applications and notifications
 
-## Phase 2 boundaries
+Creators apply through a CSRF-protected form; the database enforces one application
+per creator/posting. The posting row is locked while checking deadline and status
+and creating the application, so closing/publishing writes serialize with submissions
+on PostgreSQL. Contact and consideration edits lock the application and verify its
+version. In-app notification uniqueness is scoped to application, recipient and kind.
+Notifications carry no contact details; they link to the current private application.
+No external email provider is used. Notifications appear in the existing Engagements
+inbox and can be marked read only by their recipient.
 
-There is intentionally no application creation endpoint, creator discovery page,
-review-state mutation, notification, contact exchange or AI button. Application
-lifecycle and brand consideration are separate; **Considering is not contact consent**.
-Implement a separate, explicit, revocable consent flow with privacy checks before
-any future contact disclosure. Existing applicant messages are brand-private.
+## Consent
 
-`applicant_candidates(brand, posting_id)` limits future ranking to active creator
-accounts with submitted applications to that brand's posting; withdrawn applicants
-are excluded. `matching_requirements` supplies the canonical taxonomy and requirement
-fields used by `discovery.matching.score_creator`. Use that scorer through an explicit
-requirements adapter, extending shared missing-field handling where necessary, instead
-of copying weights or ranking the directory. Brief-specific audience/licensing inputs
-must not be inferred from arbitrary job text.
+Professional email/phone entries are separate from login/account data, are never
+prefilled from account emails, and are discarded when their share box is unchecked.
+Creator approval applies only to that application and takes effect when considered
+or shortlisted. The brand supplies and explicitly approves its own contact email.
+Both parties can revoke permission; views read current consent on every request.
+Revocation cannot recall information someone previously viewed. Contacts are never
+copied into ranking caches, engagement snapshots, public pages or notifications.
+Considering is not itself creator consent; brands can request permission in-app.
 
-`discovery.semantic` currently caches by Brief. Never reuse a job ID as a Brief ID
-or write fake private briefs. Future job semantic insights/results need their own
-posting-scoped cache with the job version, application membership, profile/portfolio
-fingerprints, scorer version and expiry. Obtain explicit Gemini consent and preserve
-the current local fallback. The applicant view currently displays “Not evaluated”;
-no compatibility score or explanation is fabricated or stored in Phase 1.
+## Recommendations
+
+`top_applicants` uses `discovery.matching.score_creator` and the existing weights,
+normalization and portfolio/profile evidence. Its adapter has a namespaced job/version
+cache identity, no invented licensing/audience requirements, and no Gemini insights.
+Optional format/aspect preferences are skipped when absent (existing Brief requirements
+remain unchanged). Results are live and limited to the best five active submitted
+applicants. Unknown pricing, availability and evidence are explained, never fabricated.
+Gemini configuration, quotas, prompts and fallback behavior are unchanged.
+
+## Existing collaboration integration
+
+Engagement now accepts exactly one source: an existing Brief or a JobPosting.
+The migration preserves every existing brief relationship and adds a nullable posting
+relationship, a source constraint and unique posting/creator constraint. Job invitations
+use the same Engagement, EngagementEvent and transition services as brief invitations.
+Project snapshots contain no contacts and do not change when postings are edited.
+Existing brief-based approved moodboards remain available only for their original source.
+Repeated invitation clicks return the existing engagement. Applicants may be invited
+after applications close, provided the delivery deadline has not passed.
+
+## Local demo data
+
+Explicitly run `python manage.py seed_opportunities --development` only with
+`DJANGO_DEBUG=True` and a deliberately selected local SQLite development database.
+The command refuses PostgreSQL and non-debug settings; it never runs on startup.
+It creates five labeled fictional brands and projects with unusable passwords and
+`example.invalid` addresses. Existing usernames/emails and records are never changed.
+Reruns do not duplicate or refresh records. It creates no fake applicants or rankings.
+
+## Validation and deployment
+
+Tests cover the new-brand/two-creator journey through application, considering,
+contact approval, invitation, delivery, revision and completion using real models
+and views. Regression tests cover original brief-based engagements and discovery.
+Apply the new additive migrations through the normal approved deployment process;
+no production data or deployment configuration is changed by development checks.

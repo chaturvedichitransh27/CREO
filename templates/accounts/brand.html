@@ -10,7 +10,7 @@
   <div class="dashboard-summary">
     <div><span class="eyebrow">YOUR PROJECTS</span><strong>{{ brief_count }} <small>saved brief{{ brief_count|pluralize }}</small></strong></div>
     <div><span class="eyebrow">READY TO SHORTLIST</span><strong>{{ active_count }} <small>active brief{{ active_count|pluralize }}</small></strong></div>
-    <div class="dashboard-links"><a href="{% url 'studio:index' %}">Creative Studio ↗</a><a href="{% url 'directory' %}">Discover creators ↗</a><a href="{% url 'creator_compare' %}">Your comparison ↗</a></div>
+    <div class="dashboard-links"><a href="{% url 'engagement_inbox' %}">Engagements &amp; notifications ↗</a><a href="{% url 'studio:index' %}">Creative Studio ↗</a><a href="{% url 'directory' %}">Discover creators ↗</a><a href="{% url 'creator_compare' %}">Your comparison ↗</a></div>
   </div>
   <a class="builder-banner" href="{% url 'brief_builder' %}"><span class="builder-symbol">✧</span><div><span class="eyebrow">FROM A SPARK TO A PLAN</span><h3>Start with the idea. Shape the brief.</h3><p>Turn a rough direction into an editable starting point with Gemini, or use the local starter.</p></div><span class="circle-arrow">↗</span></a>
   <div class="section-heading"><h2>My job <span class="serif">postings.</span></h2><a href="{% url 'opportunities:index' %}">View all {{ posting_count }} ↗</a></div>

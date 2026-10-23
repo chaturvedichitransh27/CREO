@@ -1,0 +1,22 @@
+{% extends 'opportunities/base.html' %}{% block title %}Application — {{ posting.title }} — CREO{% endblock %}
+{% block opportunity_content %}
+<a class="back-link" href="{% if user.role == 'BRAND' %}{% url 'opportunities:applicants' posting.pk %}{% else %}{% url 'opportunities:my_applications' %}{% endif %}">← Applications</a>
+<div class="eyebrow">PRIVATE APPLICATION / {{ posting.brand_name }}</div><h1>{{ posting.title }}</h1>
+<p class="lead"><a href="{{ application.creator.get_absolute_url }}">{{ application.creator.display_name }} ↗</a> · {{ application.get_status_display }} · {{ application.get_consideration_status_display }}</p><p>Applied {{ application.created_at|date:'M j, Y' }}</p>
+<div class="form-actions">{% if user.role == 'BRAND' and application.status == 'SUBMITTED' %}<a class="button" href="{% url 'opportunities:considering' application.pk %}">Considering</a>{% if application.contact_enabled and not engagement %}<a class="button button-outline" href="{% url 'opportunities:collaborate' application.pk %}">Start Collaboration ↗</a>{% endif %}{% endif %}{% if engagement %}<a class="button" href="{{ engagement.get_absolute_url }}">Open collaboration · {{ engagement.get_status_display }} ↗</a>{% endif %}<a href="{{ posting.get_absolute_url }}">Public project ↗</a></div>
+<div class="opp-details"><article class="brief-card"><h2>The application</h2>{{ application.message|default:'No message provided.'|linebreaks }}</article><article class="brief-card"><h2>Approved contacts</h2>
+{% if application.contact_enabled %}
+{% if user.role == 'BRAND' %}
+{% if contacts.creator_email %}<p><a class="button button-outline" href="mailto:{{ contacts.creator_email|urlencode }}">Contact Creator — email</a></p><p>{{ contacts.creator_email }}</p>{% endif %}
+{% if contacts.creator_phone %}<p><a class="button button-outline" href="tel:{{ contacts.creator_phone|urlencode }}">Contact Creator — phone</a></p><p>{{ contacts.creator_phone }}</p>{% endif %}
+{% if not contacts.creator_email and not contacts.creator_phone %}<p>This creator has not authorized contact sharing.</p><form method="post" action="{% url 'opportunities:contact_request' application.pk %}">{% csrf_token %}<button class="button button-outline">Request contact permission</button></form>{% endif %}
+{% if contacts.brand_email %}<p class="help-text">Your approved contact: {{ contacts.brand_email }}</p>{% endif %}
+{% else %}
+{% if contacts.brand_email %}<p><a class="button" href="mailto:{{ contacts.brand_email|urlencode }}">Contact Brand ↗</a></p><p>{{ contacts.brand_email }}</p>{% else %}<p>The brand has not authorized a professional contact email yet.</p>{% endif %}
+{% if contacts.creator_email %}<p>You share: {{ contacts.creator_email }}</p>{% endif %}{% if contacts.creator_phone %}<p>You share: {{ contacts.creator_phone }}</p>{% endif %}
+{% endif %}
+{% else %}<p>Contact details remain private until the brand considers or shortlists this application.</p>{% endif %}
+{% if user.role == 'CREATOR' %}<p><a href="{% url 'opportunities:contact_consent' application.pk %}">Manage or revoke contact permissions ↗</a></p>{% endif %}
+{% if user.role == 'BRAND' %}<p><a href="{% url 'opportunities:brand_contact' application.pk %}">Manage or revoke brand contact permission ↗</a></p>{% endif %}
+<p class="help-text">Contact permission applies only to this application. Login details are never shared automatically.</p></article></div>
+{% endblock %}

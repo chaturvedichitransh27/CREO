@@ -52,6 +52,7 @@ class JobPosting(models.Model):
     status = models.CharField(max_length=10, choices=Status.choices, default=Status.DRAFT, editable=False)
     published_at = models.DateTimeField(null=True, blank=True, editable=False)
     version = models.PositiveIntegerField(default=0, editable=False)
+    is_demo = models.BooleanField(default=False, editable=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     objects = JobPostingQuerySet.as_manager()
@@ -133,6 +134,14 @@ class Application(models.Model):
     status = models.CharField(max_length=12, choices=Status.choices, default=Status.SUBMITTED)
     consideration_status = models.CharField(max_length=12, choices=Consideration.choices, default=Consideration.UNREVIEWED)
     message = models.TextField(max_length=3000, blank=True)
+    creator_email = models.EmailField(blank=True)
+    creator_phone = models.CharField(max_length=30, blank=True)
+    share_email = models.BooleanField(default=False)
+    share_phone = models.BooleanField(default=False)
+    consent_updated_at = models.DateTimeField(null=True, blank=True)
+    brand_email = models.EmailField(blank=True)
+    brand_share_email = models.BooleanField(default=False)
+    version = models.PositiveIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -150,3 +159,33 @@ class Application(models.Model):
             raise ValidationError('Applications must belong to a creator account.')
         if self._state.adding and self.posting_id and not self.posting.accepting_applications:
             raise ValidationError('This posting is not accepting applications.')
+
+    def get_absolute_url(self):
+        return reverse('opportunities:application', args=[self.pk])
+
+    @property
+    def contact_enabled(self):
+        return self.status == self.Status.SUBMITTED and self.consideration_status in {self.Consideration.CONSIDERING, self.Consideration.SHORTLISTED}
+
+
+class Notification(models.Model):
+    class Kind(models.TextChoices):
+        APPLIED = 'APPLIED', 'New application'
+        CONSIDERING = 'CONSIDERING', 'Brand is considering you'
+        CONTACT_REQUEST = 'CONTACT_REQUEST', 'Contact permission requested'
+        CONTACT_UPDATED = 'CONTACT_UPDATED', 'Contact permission updated'
+        INVITED = 'INVITED', 'Collaboration invitation'
+
+    recipient = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='marketplace_notifications')
+    application = models.ForeignKey(Application, on_delete=models.CASCADE, related_name='notifications')
+    kind = models.CharField(max_length=20, choices=Kind.choices)
+    created_at = models.DateTimeField(auto_now_add=True)
+    read_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ['-created_at', '-pk']
+        constraints = [models.UniqueConstraint(fields=['recipient', 'application', 'kind'], name='unique_application_notification')]
+        indexes = [models.Index(fields=['recipient', 'read_at', '-created_at'])]
+
+    def get_absolute_url(self):
+        return self.application.get_absolute_url()

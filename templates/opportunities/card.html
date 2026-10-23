@@ -3,5 +3,5 @@
   <h3><a href="{% url 'opportunities:manage' posting.pk %}">{{ posting.title }}</a></h3>
   <p>{{ posting.description|default:'Your project is taking shape. Continue editing this draft.'|truncatechars:150 }}</p>
   <div class="brief-card-facts"><span>{% if posting.budget_min %}{{ posting.currency }} {{ posting.budget_min }}–{{ posting.budget_max }}{% else %}Budget to define{% endif %}</span><span>{{ posting.applicant_count }} applicant{{ posting.applicant_count|pluralize }}</span></div>
-  <div class="work-actions"><a href="{% url 'opportunities:manage' posting.pk %}">Manage project ↗</a><a href="{% url 'opportunities:applicants' posting.pk %}">Applicants →</a></div>
+  <div class="work-actions"><a href="{% url 'opportunities:manage' posting.pk %}">Manage project ↗</a><a href="{% url 'opportunities:applicants' posting.pk %}">Manage Applicants →</a></div>
 </article>

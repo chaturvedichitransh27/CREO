@@ -5,7 +5,7 @@
 <div class="eyebrow">CREO OPPORTUNITIES / DEFINE THE POSSIBILITIES</div>
 <h1>{% if posting.pk %}Refine the{% else %}Post a{% endif %} <span class="serif">project.</span></h1>
 <p class="lead">A clear direction attracts the right creative talent. Start with a title and save a draft, or complete the essentials to publish.</p>
-<div class="notice">{% if posting.status == 'DRAFT' %}Drafts are private. Publishing makes the project details below public.{% else %}This project is public. Saved changes appear on its public page immediately.{% endif %} Applications will become available in a future release; publishing currently gives you a shareable project page.</div>
+<div class="notice">{% if posting.status == 'DRAFT' %}Drafts are private. Publishing makes the project details below public.{% else %}This project is public. Saved changes appear on its public page immediately.{% endif %} Open projects appear in Explore Opportunities and accept creator applications until the application deadline.</div>
 <form method="post" class="form-panel opp-form">
   {% csrf_token %}{{ form.version }}
   {% if form.non_field_errors %}<div class="form-error" role="alert">{{ form.non_field_errors }}</div>{% endif %}
