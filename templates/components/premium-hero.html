@@ -6,6 +6,7 @@
     <p>Connect with talented AI creators, build your visual direction, and bring your vision to life — together.</p>
     <div class="hero-actions"><a class="button" href="{% url 'directory' %}">Explore Creators <span aria-hidden="true">→</span></a><a class="button button-outline" href="{% url 'register' %}?role=CREATOR">I’m a Creator</a></div>
     <div class="hero-proof"><div><strong>{{ creator_count }}</strong><span>Creator profile{{ creator_count|pluralize }}</span></div><div><strong>3</strong><span>Compare side by side</span></div><div><strong>One place</strong><span>From brief to delivery</span></div></div>
+    {% if not user.is_authenticated or user.role == 'BRAND' %}<p><a class="button button-outline" href="{% url 'opportunities:create' %}">Post a Project ↗</a></p>{% endif %}
     <p class="hero-disclosure">Explore the collective. Fictional demo profiles are clearly labeled.</p>
   </div>
   <div class="hero-composition" aria-label="Illustrated creative direction, discovery and collaboration">

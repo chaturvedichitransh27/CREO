@@ -1,0 +1,16 @@
+{% extends 'opportunities/base.html' %}
+{% block title %}{% if posting.pk %}Edit project{% else %}Post a project{% endif %} — CREO{% endblock %}
+{% block opportunity_content %}
+<a class="back-link" href="{% url 'opportunities:index' %}">← My job postings</a>
+<div class="eyebrow">CREO OPPORTUNITIES / DEFINE THE POSSIBILITIES</div>
+<h1>{% if posting.pk %}Refine the{% else %}Post a{% endif %} <span class="serif">project.</span></h1>
+<p class="lead">A clear direction attracts the right creative talent. Start with a title and save a draft, or complete the essentials to publish.</p>
+<div class="notice">{% if posting.status == 'DRAFT' %}Drafts are private. Publishing makes the project details below public.{% else %}This project is public. Saved changes appear on its public page immediately.{% endif %} Applications will become available in a future release; publishing currently gives you a shareable project page.</div>
+<form method="post" class="form-panel opp-form">
+  {% csrf_token %}{{ form.version }}
+  {% if form.non_field_errors %}<div class="form-error" role="alert">{{ form.non_field_errors }}</div>{% endif %}
+  {% for error in form.version.errors %}<p class="field-error" role="alert">{{ error }}</p>{% endfor %}
+  {% for heading, fields in form.groups %}<fieldset><legend>{{ heading }}</legend>{% include 'form_fields.html' with form=fields %}</fieldset>{% endfor %}
+  <div class="form-actions">{% if posting.status == 'DRAFT' %}<button class="button" name="action" value="publish" type="submit">Publish project ↗</button><button class="button button-outline" name="action" value="draft" type="submit" formnovalidate>Save draft</button>{% else %}<button class="button" name="action" value="save" type="submit">Save public changes ↗</button>{% endif %}<a href="{% url 'opportunities:index' %}">Cancel</a></div>
+</form>
+{% endblock %}

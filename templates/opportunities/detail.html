@@ -1,0 +1,8 @@
+{% extends 'opportunities/base.html' %}
+{% block title %}{{ posting.title }} — CREO Opportunities{% endblock %}
+{% block opportunity_content %}
+<a class="back-link" href="{% url 'home' %}">← CREO</a><div class="eyebrow">CREO OPPORTUNITIES / {{ posting.brand_name }}</div>
+<h1>{{ posting.title }}</h1><p class="lead">A creative project by {{ posting.brand_name }}</p><p><span class="status-pill">{{ posting.display_status }}</span></p>
+<div class="notice">{% if posting.accepting_applications %}This opportunity is published. Applying through CREO will become available in a future release.{% else %}Applications are closed for this project.{% endif %}</div>
+{% include 'opportunities/requirements.html' %}
+{% endblock %}

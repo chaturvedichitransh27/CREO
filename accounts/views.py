@@ -30,8 +30,12 @@ def register(request):
 def dashboard(request):
     if request.user.role == 'BRAND':
         from briefs.models import Brief
+        from django.db.models import Count
+        from opportunities.models import JobPosting
         briefs = Brief.objects.filter(brand=request.user)
+        postings = JobPosting.objects.filter(brand=request.user).annotate(applicant_count=Count('applications')).order_by('-updated_at', '-pk')
         return render(request, 'accounts/brand.html', {'briefs': briefs, 'brief_count': briefs.count(),
-                      'active_count': briefs.filter(status='ACTIVE').count()})
+                      'active_count': briefs.filter(status='ACTIVE').count(),
+                      'job_postings': postings[:3], 'posting_count': postings.count()})
     profile, _ = CreatorProfile.objects.get_or_create(user=request.user, defaults={'display_name': request.user.first_name or request.user.username})
     return render(request, 'creators/dashboard.html', {'profile': profile, 'items': profile.portfolio_items.prefetch_related('tools')})

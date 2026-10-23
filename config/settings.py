@@ -23,7 +23,7 @@ if os.getenv('RENDER_EXTERNAL_HOSTNAME'):
     CSRF_TRUSTED_ORIGINS.append('https://' + os.environ['RENDER_EXTERNAL_HOSTNAME'])
 INSTALLED_APPS = ['django.contrib.admin', 'django.contrib.auth', 'django.contrib.contenttypes',
                   'django.contrib.sessions', 'django.contrib.messages', 'django.contrib.staticfiles',
-                  'rest_framework', 'accounts', 'creators', 'portfolio', 'briefs', 'trust', 'engagements', 'studio']
+                  'rest_framework', 'accounts', 'creators', 'portfolio', 'briefs', 'trust', 'engagements', 'studio', 'opportunities']
 MIDDLEWARE = ['django.middleware.security.SecurityMiddleware', 'whitenoise.middleware.WhiteNoiseMiddleware',
               'django.contrib.sessions.middleware.SessionMiddleware', 'django.middleware.common.CommonMiddleware',
               'django.middleware.csrf.CsrfViewMiddleware', 'django.contrib.auth.middleware.AuthenticationMiddleware',

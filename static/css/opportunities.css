@@ -1,0 +1,28 @@
+/* Isolated layout; colours, typography, cards and controls inherit CREO's theme. */
+.opportunities { padding-bottom: 80px; }
+.opportunities h1, .opportunities h2, .opportunities h3, .opportunities dd, .opportunities p { overflow-wrap: anywhere; }
+.opportunities .opp-form { max-width: 900px; margin-top: 32px; }
+.opportunities fieldset { min-width: 0; border: 0; padding: 0 0 28px; margin: 0 0 28px; border-bottom: 1px solid rgba(166, 145, 220, .2); }
+.opportunities legend { font-size: 1.15rem; font-weight: 650; margin-bottom: 24px; }
+.opportunities .opp-details { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; margin-top: 28px; }
+.opportunities .opp-wide { grid-column: 1 / -1; }
+.opportunities dl { margin-top: 20px; }
+.opportunities dt { font-size: .8rem; opacity: .7; margin-top: 18px; }
+.opportunities dd { margin: 6px 0 0; }
+.opportunities dd small { display: block; margin-top: 6px; opacity: .7; }
+.opportunities .opp-toolbar { margin: 24px 0; flex-wrap: wrap; }
+.opportunities .opp-toolbar form { margin: 0; }
+.opportunities .opp-applicant { margin: 24px 0; }
+.opportunities .opp-applicant h3, .opportunities .opp-details h3 { margin: 24px 0 12px; }
+.opportunities .opp-prose p { white-space: normal; }
+.opportunities .opp-applicant ul { padding-left: 20px; }
+.opportunities .opp-applicant li { margin: 12px 0; }
+.opportunities .notice { margin: 24px 0; }
+.opportunities .form-actions { flex-wrap: wrap; gap: 16px; }
+.opportunities input, .opportunities textarea, .opportunities select { max-width: 100%; }
+@media (max-width: 700px) {
+  .opportunities .opp-details { grid-template-columns: minmax(0, 1fr); }
+  .opportunities .opp-form { padding: 22px 16px; }
+  .opportunities .section-heading { align-items: flex-start; flex-direction: column; gap: 16px; }
+  .opportunities .opp-toolbar { align-items: stretch; }
+}

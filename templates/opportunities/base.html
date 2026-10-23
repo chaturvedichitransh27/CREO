@@ -1,0 +1,3 @@
+{% extends 'base.html' %}{% load static %}
+{% block extra_head %}<link rel="stylesheet" href="{% static 'css/opportunities.css' %}">{% endblock %}
+{% block content %}<section class="container dashboard opportunities">{% block opportunity_content %}{% endblock %}</section>{% endblock %}
