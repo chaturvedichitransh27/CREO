@@ -4,6 +4,7 @@ from django.urls import reverse
 
 
 class Engagement(models.Model):
+    reference_images = models.ManyToManyField('briefs.ReferenceImage', blank=True, related_name='shared_engagements')
     class Status(models.TextChoices):
         INVITED = 'INVITED', 'Invited'
         ACCEPTED = 'ACCEPTED', 'Accepted'

@@ -30,6 +30,7 @@ def invite(request, brief_pk, creator_pk):
                 if current.status != 'ACTIVE' or current.deadline < timezone.localdate():
                     raise ValidationError('Set the brief to Ready to shortlist with a current or future deadline before inviting.')
                 engagement = Engagement.objects.create(brief=current, creator=creator, brief_snapshot=snapshot(current), message=form.cleaned_data['message'])
+                engagement.reference_images.set(current.reference_images.filter(active=True))
                 EngagementEvent.objects.create(engagement=engagement, actor=request.user, status='INVITED', note='Invitation sent; brief snapshot shared.')
         except ValidationError as exc:
             form.add_error(None, exc)
@@ -78,4 +79,5 @@ def detail(request, pk):
     from opportunities.models import Application
     application = Application.objects.filter(posting_id=engagement.posting_id, creator_id=engagement.creator_id).first() if engagement.posting_id else None
     return render(request, 'engagements/detail.html', {'engagement': engagement, 'form': form, 'choices': choices, 'approved_moodboard': approved_moodboard, 'application': application,
-                  'events': engagement.events.select_related('actor'), 'snapshot': engagement.brief_snapshot})
+                  'events': engagement.events.select_related('actor'), 'snapshot': engagement.brief_snapshot,
+                  'reference_images': engagement.reference_images.all()})

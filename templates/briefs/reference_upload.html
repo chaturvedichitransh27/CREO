@@ -1,0 +1,16 @@
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/references.css' %}">
+<script defer src="{% static 'js/references.js' %}"></script>
+<fieldset class="reference-upload" data-reference-upload>
+  <legend>Visual References (Optional)</legend>
+  <p class="help-text">Upload up to 3 images to show creators the style, mood, or visual direction you're looking for. JPG, PNG or WebP; up to 5 MB each.</p>
+  <p class="help-text">{% if public_references %}These images become public when you publish this project.{% else %}These images stay private until you include them in a creator invitation.{% endif %} Upload only images you have permission to share. Previously sent invitations retain their original references.</p>
+  {% if references.errors %}<div class="form-error" role="alert">{{ references.non_field_errors }}{{ references.reference_uploads.errors }}{{ references.remove_references.errors }}<p>If you selected new files, please select them again before saving.</p></div>{% endif %}
+  <div class="reference-thumbnails">
+    {% for item in references.existing %}<div class="reference-thumbnail" data-existing-reference><img src="{{ item.get_absolute_url }}" alt="Saved visual reference {{ forloop.counter }}" loading="lazy"><label><input type="checkbox" name="remove_references" value="{{ item.pk }}" {% if item.pk|stringformat:"s" in references.remove_references.value %}checked{% endif %}> Remove reference {{ forloop.counter }}</label></div>{% endfor %}
+  </div>
+  <label for="{{ references.reference_uploads.id_for_label }}">Add Reference Images</label>
+  {{ references.reference_uploads }}
+  <div class="reference-thumbnails" data-new-previews></div>
+  <p class="help-text" data-reference-count aria-live="polite">{{ references.existing|length }} of 3 images saved. New selections are added when you save.</p>
+</fieldset>

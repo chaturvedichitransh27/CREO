@@ -8,5 +8,5 @@
 {% if posting.status != 'DRAFT' %}<form method="post" action="{% url 'opportunities:transition' posting.pk %}">{% csrf_token %}<input type="hidden" name="version" value="{{ posting.version }}">{% if posting.status == 'OPEN' %}<button class="button button-outline" name="action" value="close">Close applications</button>{% else %}<button class="button button-outline" name="action" value="reopen">Reopen applications</button>{% endif %}</form>{% endif %}</div>
 <div class="notice">{% if posting.status == 'DRAFT' %}Only you can see this draft. Complete the essentials and approve the public details to publish.{% else %}This project has a public page. Closing applications keeps the published details visible.{% endif %} Open projects appear automatically in Explore Opportunities.</div>
 <p class="help-text">Applicant counts include all applications, including withdrawn applications. Use the Applicants filters to review submitted applications.</p>
-{% include 'opportunities/requirements.html' %}
+{% include 'briefs/reference_carousel.html' %}{% include 'opportunities/requirements.html' %}
 {% endblock %}

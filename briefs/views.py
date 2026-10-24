@@ -2,7 +2,7 @@ import uuid
 from functools import wraps
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.db.models.deletion import ProtectedError
 from django.shortcuts import get_object_or_404, redirect, render
 from django.core.paginator import Paginator
@@ -12,13 +12,14 @@ from django.views.decorators.http import require_http_methods
 from . import ai
 from .forms import BriefForm, BuilderForm
 from .models import Brief
+from .references import ReferenceForm, save_with_references
 
 
 def brand_required(view):
     @login_required
     @wraps(view)
     def wrapped(request, *args, **kwargs):
-        if request.user.role != 'BRAND':
+        if request.user.role != 'BRAND' or not request.user.is_active:
             raise PermissionDenied
         return view(request, *args, **kwargs)
     return wrapped
@@ -29,6 +30,7 @@ def owned_brief(request, pk):
 
 
 @brand_required
+@require_http_methods(['GET', 'POST'])
 def edit(request, pk=None):
     brief = owned_brief(request, pk) if pk else Brief(brand=request.user)
     draft_id = request.GET.get('draft', '') if not pk else ''
@@ -37,22 +39,29 @@ def edit(request, pk=None):
         draft = None
     initial = draft['data'] if draft else None
     form = BriefForm(request.POST if request.method == 'POST' else None, instance=brief, initial=initial)
-    if request.method == 'POST' and form.is_valid():
+    references = ReferenceForm(request.POST if request.method == 'POST' else None, request.FILES or None, parent=brief)
+    valid = form.is_valid() & references.is_valid() if request.method == 'POST' else False
+    if valid:
         if draft:
             form.instance.source = draft['source']
-        form.save()
-        if draft:
-            drafts = request.session.get('brief_drafts', {})
-            drafts.pop(draft_id, None)
-            request.session['brief_drafts'] = drafts
-        messages.success(request, 'Brief saved. Explore the creators who fit your vision.')
-        return redirect(brief)
-    return render(request, 'briefs/form.html', {'form': form, 'brief': brief, 'draft': draft})
+        try:
+            save_with_references(form, references, request.user, form.save)
+        except ValidationError as exc:
+            references.add_error(None, exc)
+        else:
+            if draft:
+                drafts = request.session.get('brief_drafts', {})
+                drafts.pop(draft_id, None)
+                request.session['brief_drafts'] = drafts
+            messages.success(request, 'Brief saved. Explore the creators who fit your vision.')
+            return redirect(brief)
+    return render(request, 'briefs/form.html', {'form': form, 'brief': brief, 'draft': draft, 'references': references})
 
 
 @brand_required
 def detail(request, pk):
-    return render(request, 'briefs/detail.html', {'brief': owned_brief(request, pk)})
+    brief = owned_brief(request, pk)
+    return render(request, 'briefs/detail.html', {'brief': brief, 'reference_images': brief.reference_images.filter(active=True)})
 
 
 @brand_required

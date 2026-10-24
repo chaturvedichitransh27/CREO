@@ -259,6 +259,7 @@ def start_collaboration(user, pk, data):
     engagement, created = Engagement.objects.get_or_create(posting=posting, creator=application.creator,
         defaults={'brief_snapshot': posting_snapshot(posting), 'message': data['message']})
     if created:
+        engagement.reference_images.set(posting.reference_images.filter(active=True))
         EngagementEvent.objects.create(engagement=engagement, actor=user, status='INVITED', note='Opportunity invitation sent; project snapshot shared.')
         notify(application, application.creator.user_id, 'INVITED')
     return engagement

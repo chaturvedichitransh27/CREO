@@ -1,0 +1,11 @@
+{% if reference_images %}{% load static %}
+<link rel="stylesheet" href="{% static 'css/references.css' %}">
+<script defer src="{% static 'js/references.js' %}"></script>
+<section class="reference-carousel" data-reference-carousel role="region" aria-roledescription="carousel" aria-label="Visual References">
+  <h2>Visual References</h2><p class="help-text">Explore the visual direction shared by the Brand.</p>
+  <div class="reference-track" tabindex="0" aria-label="Reference images. Swipe or use left and right arrow keys.">
+    {% for item in reference_images %}<div class="reference-slide" role="group" aria-roledescription="slide" aria-label="{{ forloop.counter }} of {{ reference_images|length }}"><img src="{{ item.get_absolute_url }}" alt="Visual reference {{ forloop.counter }} shared by the Brand" {% if not forloop.first %}loading="lazy"{% endif %} decoding="async"></div>{% endfor %}
+  </div>
+  <div class="reference-controls" hidden><button type="button" class="button button-outline" data-previous aria-label="Previous reference">←</button><span data-slide-count role="status" aria-live="polite">1 / {{ reference_images|length }}</span><button type="button" class="button button-outline" data-next aria-label="Next reference">→</button></div>
+</section>
+{% endif %}

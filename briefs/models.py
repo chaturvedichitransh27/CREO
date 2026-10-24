@@ -4,6 +4,48 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.urls import reverse
 from portfolio.models import PortfolioItem
+from trust.models import evidence_storage
+import uuid
+
+
+def reference_path(instance, filename):
+    return f'brief_references/{uuid.uuid4().hex}.webp'
+
+
+class ReferenceImage(models.Model):
+    """Explicit references for either brief type; shared invitation bytes are immutable."""
+    brief = models.ForeignKey('Brief', null=True, blank=True, on_delete=models.CASCADE, related_name='reference_images')
+    posting = models.ForeignKey('opportunities.JobPosting', null=True, blank=True, on_delete=models.CASCADE, related_name='reference_images')
+    image = models.ImageField(upload_to=reference_path, storage=evidence_storage)
+    position = models.PositiveSmallIntegerField()
+    active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['position', 'pk']
+        constraints = [
+            models.CheckConstraint(condition=(models.Q(brief__isnull=False, posting__isnull=True) | models.Q(brief__isnull=True, posting__isnull=False)), name='reference_one_parent'),
+            models.CheckConstraint(condition=models.Q(position__gte=0, position__lte=2), name='reference_three_slots'),
+            models.UniqueConstraint(fields=['brief', 'position'], condition=models.Q(active=True), name='reference_brief_slot'),
+            models.UniqueConstraint(fields=['posting', 'position'], condition=models.Q(active=True), name='reference_posting_slot'),
+        ]
+
+    def get_absolute_url(self):
+        return reverse('brief_reference_image', args=[self.pk])
+
+
+from django.db.models.signals import post_delete
+from django.dispatch import receiver
+from django.db import transaction
+
+
+@receiver(post_delete, sender=ReferenceImage)
+def cleanup_reference(sender, instance, **kwargs):
+    # Defer physical deletion until commit, including cascades; never delete a
+    # file while a failed transaction can still restore its database record.
+    if instance.image.name:
+        storage, name = instance.image.storage, instance.image.name
+        transaction.on_commit(lambda: storage.delete(name), robust=True)
 
 
 class Brief(models.Model):

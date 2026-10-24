@@ -13,6 +13,7 @@ from .forms import (JobPostingForm, PostingActionForm, OpportunityFilterForm, Ap
                     ContactConsentForm, ConsideringForm, ApplicantFilterForm, BrandContactForm)
 from .models import JobPosting, Application, Notification
 from .services import change_status, owned_posting, require_brand, save_posting
+from briefs.references import ReferenceForm, save_with_references
 
 
 def brand_required(view):
@@ -39,26 +40,28 @@ def edit(request, pk=None):
     posting = owned_posting(request.user, pk) if pk else JobPosting(brand=request.user)
     action = request.POST.get('action', 'draft' if posting.status == JobPosting.Status.DRAFT else 'save')
     form = JobPostingForm(request.POST if request.method == 'POST' else None, instance=posting, publish=action == 'publish')
-    if request.method == 'POST' and form.is_valid():
+    references = ReferenceForm(request.POST if request.method == 'POST' else None, request.FILES or None, parent=posting)
+    valid = form.is_valid() & references.is_valid() if request.method == 'POST' else False
+    if valid:
         allowed = {'draft', 'publish'} if posting.status == JobPosting.Status.DRAFT else {'save'}
         if action not in allowed:
             form.add_error(None, 'Choose a valid save action for this posting.')
         else:
             try:
-                posting = save_posting(form, request.user)
+                posting = save_with_references(form, references, request.user, lambda: save_posting(form, request.user))
             except ValidationError as error:
                 form.add_error(None, ' '.join(error.messages))
             else:
                 messages.success(request, 'Project published.' if action == 'publish' else 'Project saved.')
                 return redirect('opportunities:manage', pk=posting.pk)
-    return render(request, 'opportunities/form.html', {'form': form, 'posting': posting})
+    return render(request, 'opportunities/form.html', {'form': form, 'posting': posting, 'references': references, 'public_references': True})
 
 
 @brand_required
 @require_GET
 def manage(request, pk):
     posting = owned_posting(request.user, pk)
-    return render(request, 'opportunities/manage.html', {'posting': posting, 'applicant_count': posting.applications.count()})
+    return render(request, 'opportunities/manage.html', {'posting': posting, 'applicant_count': posting.applications.count(), 'reference_images': posting.reference_images.filter(active=True)})
 
 
 @brand_required
@@ -84,7 +87,7 @@ def detail(request, pk):
     application = None
     if request.user.is_authenticated and request.user.role == 'CREATOR':
         application = posting.applications.filter(creator__user=request.user).first()
-    return render(request, 'opportunities/detail.html', {'posting': posting, 'application': application})
+    return render(request, 'opportunities/detail.html', {'posting': posting, 'application': application, 'reference_images': posting.reference_images.filter(active=True)})
 
 
 @brand_required
