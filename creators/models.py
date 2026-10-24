@@ -25,6 +25,15 @@ class Specialization(Taxonomy):
 
 
 class CreatorProfile(models.Model):
+    @property
+    def demo_reputation(self):
+        """Presentation-only samples; never feed verified totals or matching."""
+        from decimal import Decimal
+        examples = [('4.6', 3), ('4.8', 5), ('4.5', 7), ('4.9', 8), ('4.7', 6)]
+        rating, projects = examples[((self.pk or 1) - 1) % len(examples)]
+        rating = Decimal(rating)
+        return {'average': rating, 'percent': rating * 20, 'completed': projects}
+
     @cached_property
     def reputation(self):
         from engagements.reputation import summary, with_reputation

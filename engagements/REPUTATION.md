@@ -1,5 +1,14 @@
 # CREO Verified Reputation
 
+## Demonstration display
+
+Creator summaries also show a separately labeled "DEMO · SAMPLE DATA" panel with
+illustrative stars and 3–8 projects done. This presentation-only property is shown
+for every creator as requested for the demo. It never creates reviews, changes
+engagements, feeds matching, or alters verified totals. Real reputation and its
+neutral empty state remain visible separately. Remove the demo block from
+templates/creators/reputation_summary.html when the presentation ends.
+
 ## Eligibility and provenance
 
 The existing Engagement and EngagementEvent workflow is the source of truth.

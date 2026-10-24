@@ -1,5 +1,8 @@
 .reputation-compact { margin: 14px 0; font-size: .9rem; line-height: 1.6; }
 .reputation-compact small { display: block; color: #b5bdd2; }
+.reputation-demo { padding: 12px 14px; border: 1px dashed #9c73e0; border-radius: 12px; background: rgba(139, 92, 246, .08); }
+.reputation-demo-label { display: block; color: #d8bdff; font-size: .65rem; font-weight: 700; letter-spacing: .09em; }
+.reputation-demo strong small { display: inline; font-weight: normal; }
 .reputation-stars { display: inline-block; position: relative; white-space: nowrap; color: #566078; font-family: monospace; font-size: 1.15rem; line-height: 1; vertical-align: middle; letter-spacing: 0; }
 .reputation-stars-fill { position: absolute; overflow: hidden; inset: 0 auto 0 0; color: #c4a5ff; }
 .reputation-number { margin-left: 8px; white-space: nowrap; font-weight: 650; }

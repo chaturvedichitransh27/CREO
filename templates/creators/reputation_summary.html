@@ -2,3 +2,9 @@
 {% if reputation.count %}<div>{% include 'engagements/rating_stars.html' with rating=reputation.average percent=reputation.percent %}</div>{% else %}<strong>Not yet rated</strong>{% endif %}
 <small>{{ reputation.count }} Verified Review{{ reputation.count|pluralize }} · {{ reputation.completed }} Completed Project{{ reputation.completed|pluralize }}</small>
 </div>{% endwith %}
+{% with demo=profile.demo_reputation %}<div class="reputation-compact reputation-demo" aria-label="Illustrative demo reputation">
+<span class="reputation-demo-label">DEMO · SAMPLE DATA</span>
+<div>{% include 'engagements/rating_stars.html' with rating=demo.average percent=demo.percent %}</div>
+<strong>{{ demo.completed }} projects done <small>(demo)</small></strong>
+<small>Illustrative only — not verified reviews or completed work.</small>
+</div>{% endwith %}
