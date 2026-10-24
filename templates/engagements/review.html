@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block title %}CREO Verified Reputation — {{ engagement.creator.display_name }}{% endblock %}
+{% block content %}<section class="container form-page reputation-page">
+<a class="back-link" href="{{ engagement.get_absolute_url }}">← Your engagement</a>
+<div class="eyebrow">CREO VERIFIED REPUTATION</div>
+{% if review %}<h1>Review <span class="serif">Submitted.</span></h1><p class="lead">Your verified review has been added to this Creator's reputation.</p>{% include 'engagements/review_card.html' %}<p class="help-text">Submitted reviews cannot be edited or deleted. A second review cannot be submitted for this collaboration.</p>
+{% else %}<h1>Rate <span class="serif">{{ engagement.creator.display_name }}.</span></h1><p class="lead">{{ engagement.brief_snapshot.title }} · Completed CREO collaboration</p>
+<p>Share your experience of the accepted, delivered and completed project. All five scores are required; written feedback is optional.</p>
+<div class="notice">Once submitted, your review cannot be edited. Your scores and feedback will appear publicly on the Creator's profile. Keep private contact details and confidential project information out of your feedback.</div>
+<form method="post" class="form-panel">{% csrf_token %}{% include 'form_fields.html' %}<button class="button" type="submit">Submit verified review</button></form>{% endif %}
+<p><a class="button button-outline" href="{{ engagement.creator.get_absolute_url }}#verified-reputation">View Creator reputation ↗</a></p>
+</section>{% endblock %}

@@ -78,6 +78,12 @@ def detail(request, pk):
         approved_moodboard = None
     from opportunities.models import Application
     application = Application.objects.filter(posting_id=engagement.posting_id, creator_id=engagement.creator_id).first() if engagement.posting_id else None
+    from .models import CreatorReview
+    from .reputation import eligible_engagements
+    verified_completion = eligible_engagements().filter(pk=engagement.pk).exists()
+    review = CreatorReview.objects.filter(engagement=engagement).first() if verified_completion else None
+    can_review = (verified_completion and role == 'BRAND' and request.user.is_active
+                  and not request.user.is_staff and not request.user.is_superuser and not review)
     return render(request, 'engagements/detail.html', {'engagement': engagement, 'form': form, 'choices': choices, 'approved_moodboard': approved_moodboard, 'application': application,
                   'events': engagement.events.select_related('actor'), 'snapshot': engagement.brief_snapshot,
-                  'reference_images': engagement.reference_images.all()})
+                  'reference_images': engagement.reference_images.all(), 'creator_review': review, 'can_review': can_review})

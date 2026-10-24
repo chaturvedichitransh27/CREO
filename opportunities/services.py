@@ -67,11 +67,12 @@ def applicant_candidates(user, posting_id):
     directory or reuse Brief IDs/SemanticMatchCache for jobs. No AI call occurs here.
     """
     posting = owned_posting(user, posting_id)
-    return CreatorProfile.objects.filter(
+    from engagements.reputation import with_reputation
+    return with_reputation(CreatorProfile.objects.filter(
         opportunity_applications__posting=posting,
         opportunity_applications__status=Application.Status.SUBMITTED,
         user__is_active=True, user__role='CREATOR',
-    ).select_related('user').prefetch_related('skills', 'tools', 'specializations', 'portfolio_items__tools')
+    )).select_related('user').prefetch_related('skills', 'tools', 'specializations', 'portfolio_items__tools')
 
 
 def matching_requirements(user, posting_id):

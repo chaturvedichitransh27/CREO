@@ -3,6 +3,7 @@ from django.db import models
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.urls import reverse
+from django.utils.functional import cached_property
 
 
 class Taxonomy(models.Model):
@@ -24,6 +25,12 @@ class Specialization(Taxonomy):
 
 
 class CreatorProfile(models.Model):
+    @cached_property
+    def reputation(self):
+        from engagements.reputation import summary, with_reputation
+        profile = self if hasattr(self, '_review_count') else with_reputation(type(self).objects.filter(pk=self.pk)).get()
+        return summary(profile._review_count, profile._rating_total, profile._completed_count)
+
     class Availability(models.TextChoices):
         AVAILABLE = 'AVAILABLE', 'Available for work'
         LIMITED = 'LIMITED', 'Limited availability'

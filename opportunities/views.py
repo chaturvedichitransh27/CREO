@@ -95,7 +95,10 @@ def detail(request, pk):
 def applicants(request, pk):
     posting = owned_posting(request.user, pk)
     form = ApplicantFilterForm(request.GET)
-    applications = posting.applications.select_related('creator__user').prefetch_related(
+    from creators.models import CreatorProfile
+    from engagements.reputation import with_reputation
+    applications = posting.applications.prefetch_related(
+        Prefetch('creator', queryset=with_reputation(CreatorProfile.objects.all()).select_related('user')),
         'creator__skills', 'creator__tools',
         Prefetch('creator__portfolio_items', queryset=PortfolioItem.objects.filter(
             creator__user__is_active=True, creator__user__role='CREATOR'

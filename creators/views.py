@@ -14,7 +14,8 @@ from .models import CreatorProfile, Skill, Tool, Specialization
 
 def public_profiles():
     from portfolio.models import PortfolioItem
-    return CreatorProfile.objects.filter(user__is_active=True, user__role='CREATOR').select_related('user').prefetch_related(
+    from engagements.reputation import with_reputation
+    return with_reputation(CreatorProfile.objects.filter(user__is_active=True, user__role='CREATOR')).select_related('user').prefetch_related(
         'skills', 'tools', 'specializations', Prefetch('portfolio_items', queryset=PortfolioItem.objects.select_related('creator').prefetch_related('tools', 'evidence')))
 
 def home(request):
@@ -37,7 +38,11 @@ def directory(request):
 
 def detail(request, pk):
     profile = get_object_or_404(public_profiles(), pk=pk)
-    return render(request, 'creators/detail.html', {'profile': profile, 'items': profile.portfolio_items.all()})
+    from engagements.reputation import eligible_reviews, category_averages
+    reviews = eligible_reviews().filter(engagement__creator=profile).select_related('engagement__posting')
+    return render(request, 'creators/detail.html', {'profile': profile, 'items': profile.portfolio_items.all(),
+        'review_page': Paginator(reviews, 6).get_page(request.GET.get('reviews_page')),
+        'rating_factors': category_averages(profile)})
 
 @login_required
 def edit_profile(request):

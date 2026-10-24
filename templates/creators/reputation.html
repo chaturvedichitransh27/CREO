@@ -1,0 +1,8 @@
+<section id="verified-reputation" class="reputation-section" aria-labelledby="reputation-heading">
+<div class="eyebrow">CREO VERIFIED REPUTATION</div><h2 id="reputation-heading">Verified <span class="serif">Reputation.</span></h2>
+<div class="brief-card">{% include 'creators/reputation_summary.html' %}
+<p class="help-text">Ratings come from Brands after verified completed CREO collaborations. Each review has equal weight; project completions and reviews are counted separately.</p>
+{% if rating_factors %}<dl class="reputation-factors">{% for factor in rating_factors %}<div><dt>{{ factor.label }}</dt><dd><meter min="0" max="5" value="{{ factor.average|floatformat:'1u' }}" aria-label="{{ factor.label }}: {{ factor.average|floatformat:1 }} out of 5"></meter> {{ factor.average|floatformat:1 }} / 5</dd></div>{% endfor %}</dl>{% endif %}</div>
+{% for review in review_page %}{% include 'engagements/review_card.html' %}{% empty %}<div class="empty"><p>No verified reviews yet. Ratings become available after completed CREO collaborations.</p></div>{% endfor %}
+{% if review_page.has_other_pages %}<nav class="pagination" aria-label="Verified review pages">{% if review_page.has_previous %}<a href="?reviews_page={{ review_page.previous_page_number }}#verified-reputation">← Previous reviews</a>{% endif %}<span>{{ review_page.number }} / {{ review_page.paginator.num_pages }}</span>{% if review_page.has_next %}<a href="?reviews_page={{ review_page.next_page_number }}#verified-reputation">Next reviews →</a>{% endif %}</nav>{% endif %}
+</section>

@@ -1,0 +1,6 @@
+<article class="brief-card reputation-review">
+<div class="section-heading"><div><h3>{{ review.public_brand_name }}</h3><span class="status-pill">Verified Collaboration</span></div><time datetime="{{ review.created_at|date:'Y-m-d' }}">{{ review.created_at|date:'M j, Y' }}</time></div>
+<p>{{ review.public_project_title }}</p><div>{% include 'engagements/rating_stars.html' with rating=review.overall percent=review.percent %}</div>
+{% if review.written_feedback %}<div class="prose reputation-feedback">{{ review.written_feedback|linebreaks }}</div>{% endif %}
+<details><summary>Individual rating factors</summary><dl class="reputation-factors">{% for factor in review.factors %}<div><dt>{{ factor.label }}</dt><dd>{{ factor.score }} / 5</dd></div>{% endfor %}</dl></details>
+</article>

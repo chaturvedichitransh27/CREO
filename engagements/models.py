@@ -52,3 +52,62 @@ class EngagementEvent(models.Model):
 
     class Meta:
         ordering = ['created_at', 'pk']
+        indexes = [models.Index(fields=['engagement', 'status', 'actor'], name='engagement_evidence_idx')]
+
+
+class CreatorReview(models.Model):
+    # Participants are derived from this immutable provenance, never client IDs.
+    engagement = models.OneToOneField(Engagement, on_delete=models.PROTECT, related_name='creator_review')
+    quality_rating = models.PositiveSmallIntegerField()
+    timeliness_rating = models.PositiveSmallIntegerField()
+    communication_rating = models.PositiveSmallIntegerField()
+    professionalism_rating = models.PositiveSmallIntegerField()
+    requirements_rating = models.PositiveSmallIntegerField()
+    written_feedback = models.TextField(max_length=1000, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at', '-pk']
+        constraints = [models.CheckConstraint(condition=models.Q(**{name + '__in': [1, 2, 3, 4, 5]}), name='review_' + name + '_valid')
+                       for name in ['quality_rating', 'timeliness_rating', 'communication_rating', 'professionalism_rating', 'requirements_rating']]
+
+    def save(self, *args, **kwargs):
+        from django.core.exceptions import ValidationError
+        from .reputation import FACTORS, validate_scores, eligible_engagements
+        if not self._state.adding:
+            raise ValidationError('Submitted reviews cannot be edited.')
+        validate_scores({name: getattr(self, name) for name, _ in FACTORS})
+        if not eligible_engagements().filter(pk=self.engagement_id).exists():
+            raise ValidationError('This collaboration is not eligible for a verified review.')
+        self.written_feedback = self.written_feedback.strip()
+        self.full_clean()
+        return super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        from django.core.exceptions import ValidationError
+        raise ValidationError('Submitted reviews cannot be deleted.')
+
+    @property
+    def overall(self):
+        from decimal import Decimal
+        from .reputation import FACTORS, format_score
+        return format_score(Decimal(sum(getattr(self, name) for name, _ in FACTORS)) / 5)
+
+    @property
+    def percent(self):
+        return self.overall * 20
+
+    @property
+    def public_brand_name(self):
+        posting = self.engagement.posting
+        return posting.brand_name if posting and posting.published_at and posting.status in {'OPEN', 'CLOSED'} else 'Verified Brand'
+
+    @property
+    def public_project_title(self):
+        posting = self.engagement.posting
+        return posting.title if posting and posting.published_at and posting.status in {'OPEN', 'CLOSED'} else 'Private CREO project'
+
+    @property
+    def factors(self):
+        from .reputation import FACTORS
+        return [{'label': label, 'score': getattr(self, name)} for name, label in FACTORS]

@@ -1,0 +1,17 @@
+.reputation-compact { margin: 14px 0; font-size: .9rem; line-height: 1.6; }
+.reputation-compact small { display: block; color: #b5bdd2; }
+.reputation-stars { display: inline-block; position: relative; white-space: nowrap; color: #566078; font-family: monospace; font-size: 1.15rem; line-height: 1; vertical-align: middle; letter-spacing: 0; }
+.reputation-stars-fill { position: absolute; overflow: hidden; inset: 0 auto 0 0; color: #c4a5ff; }
+.reputation-number { margin-left: 8px; white-space: nowrap; font-weight: 650; }
+.reputation-section { margin-top: 60px; }
+.reputation-review { margin-top: 24px; overflow-wrap: anywhere; }
+.reputation-review .section-heading { gap: 16px; flex-wrap: wrap; }
+.reputation-review h3 { margin-bottom: 12px; }
+.reputation-review details { margin-top: 18px; }
+.reputation-factors { display: grid; gap: 14px; margin-top: 24px; }
+.reputation-factors > div { display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+.reputation-factors dd { margin: 0; }
+.reputation-factors meter { width: 100px; max-width: 100%; accent-color: #a78bfa; }
+.reputation-page select:focus-visible, .reputation-page textarea:focus-visible, .reputation-page button:focus-visible, .reputation-review summary:focus-visible { outline: 2px solid #c4b5fd; outline-offset: 3px; }
+.reputation-feedback { white-space: normal; }
+@media(max-width: 600px) { .reputation-review .section-heading { flex-direction: column; align-items: flex-start; } .reputation-factors > div { gap: 8px; } }

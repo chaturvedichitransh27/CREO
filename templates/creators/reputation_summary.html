@@ -1,0 +1,4 @@
+{% with reputation=profile.reputation %}<div class="reputation-compact" aria-label="CREO Verified Reputation">
+{% if reputation.count %}<div>{% include 'engagements/rating_stars.html' with rating=reputation.average percent=reputation.percent %}</div>{% else %}<strong>Not yet rated</strong>{% endif %}
+<small>{{ reputation.count }} Verified Review{{ reputation.count|pluralize }} · {{ reputation.completed }} Completed Project{{ reputation.completed|pluralize }}</small>
+</div>{% endwith %}
