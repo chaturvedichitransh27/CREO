@@ -350,7 +350,7 @@ class ApplicantArchitectureTests(OpportunityTestCase):
         relevant = PortfolioItem.objects.create(creator=self.creator, title='Relevant work', description='Public work', format='FILM', aspect_ratio='16:9')
         relevant.tools.add(self.tool)
         response = self.client.get(self.url('applicants'))
-        for value in ['Public Creative Name', self.skill.name, self.tool.name, 'Relevant work', 'A private proposal', 'Submitted', 'Not reviewed', 'Find My Top 5 Matches']:
+        for value in ['Public Creative Name', self.skill.name, self.tool.name, 'Relevant work', 'A private proposal', 'Submitted', 'Not reviewed', 'Find Top 5 Matches']:
             self.assertContains(response, value)
         for value in [self.creator_user.email, self.brand.email, 'mailto:', 'tel:']:
             self.assertNotContains(response, value)

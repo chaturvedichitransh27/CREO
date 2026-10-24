@@ -1,0 +1,41 @@
+/* Workspace layout only; controls, cards, colours and type inherit CREO. */
+.workspace { padding-bottom: 72px; }
+.workspace h1, .workspace h2, .workspace h3, .workspace p { overflow-wrap: anywhere; }
+.workspace .workspace-heading { gap: 24px; }
+.workspace .workspace-primary, .workspace .workspace-tabs, .workspace .workspace-secondary,
+.workspace .workspace-pagination, .workspace .workspace-caption { display: flex; align-items: center; flex-wrap: wrap; gap: 18px; }
+.workspace .workspace-primary { flex-shrink: 0; }
+.workspace .workspace-tabs { margin: 12px 0 40px; padding-bottom: 20px; border-bottom: 1px solid #7787a52e; }
+.workspace .workspace-tabs a { padding: 8px 0; font-weight: 600; }
+.workspace .workspace-search { margin-top: 28px; }
+.workspace .workspace-caption { justify-content: space-between; margin: 18px 0 24px; font-size: .9rem; }
+.workspace .workspace-section { margin-top: 64px; }
+.workspace [id] { scroll-margin-top: 100px; }
+.workspace .workspace-pagination { justify-content: center; margin-top: 28px; }
+.workspace .brief-card h2 { font-size: 25px; line-height: 1.2; }
+.workspace .workspace-interest { margin-top: 22px; }
+.workspace .workspace-interest details { margin-bottom: 18px; }
+.workspace summary { cursor: pointer; }
+.workspace .workspace-interest summary { font-size: .85rem; margin-bottom: 12px; }
+.workspace .workspace-interest summary span { opacity: .7; }
+.workspace .workspace-interest textarea { width: 100%; }
+.workspace .workspace-interest .help-text { margin-top: 12px; font-size: .75rem; }
+.workspace .workspace-application, .workspace .workspace-update { display: flex; align-items: center; flex-wrap: wrap; gap: 16px; padding: 22px 0; border-bottom: 1px solid #7787a52e; }
+.workspace .workspace-application > div, .workspace .workspace-update > div { flex: 1 1 240px; min-width: 0; }
+.workspace .workspace-application h3 { font-size: 20px; }
+.workspace .workspace-application p, .workspace .workspace-update p { margin: 8px 0 0; font-size: .85rem; }
+.workspace .workspace-updates { margin-top: 32px; }
+.workspace .workspace-tools { margin-top: 48px; border: 1px solid #7787a52e; border-radius: 18px; padding: 24px; }
+.workspace .workspace-tools > summary { font-size: 1.1rem; font-weight: 600; }
+.workspace .workspace-tools > summary span { font-size: .8rem; opacity: .65; margin-left: 16px; }
+.workspace .workspace-secondary { padding: 24px 0; font-size: .9rem; }
+.workspace .workspace-tools .section-heading { margin-top: 24px; }
+.workspace .creator-grid .card-compare .button { width: 100%; }
+@media (max-width: 1000px) { .workspace .workspace-heading { flex-wrap: wrap; } }
+@media (max-width: 760px) {
+  .workspace .section-heading { flex-wrap: wrap; gap: 16px; }
+  .workspace .workspace-tools { padding: 20px 16px; }
+  .workspace .workspace-tabs { gap: 12px 22px; font-size: .85rem; }
+  .workspace .workspace-primary { flex-shrink: 1; }
+  .workspace .workspace-section { margin-top: 40px; }
+}

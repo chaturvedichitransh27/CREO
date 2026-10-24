@@ -5,7 +5,7 @@
 <div class="eyebrow">CREO OPPORTUNITIES / PRIVATE TO YOUR BRAND</div><h1>The talent <span class="serif">behind it.</span></h1>
 <p class="lead">{{ page_obj.paginator.count }} applicant{{ page_obj.paginator.count|pluralize }} for {{ posting.title }}.</p>
 <form method="get" class="form-panel opp-filters">{% include 'form_fields.html' with form=filter_form %}<button class="button button-outline">Filter applicants</button></form>
-{% if posting.status != 'DRAFT' %}<form method="post" action="{% url 'opportunities:recommendations' posting.pk %}" class="form-actions">{% csrf_token %}<button class="button">Find My Top 5 Matches ↗</button></form>{% endif %}
+{% if posting.status != 'DRAFT' %}<form method="post" action="{% url 'opportunities:recommendations' posting.pk %}" class="form-actions">{% csrf_token %}<button class="button">Find Top 5 Matches ↗</button></form>{% endif %}
 {% for application in page_obj %}<article class="brief-card opp-applicant">
 <div class="section-heading"><div><h2><a href="{{ application.creator.get_absolute_url }}">{{ application.creator.display_name }}</a></h2><p>{{ application.creator.headline }}</p></div><a class="button button-outline" href="{{ application.creator.get_absolute_url }}">Creator profile ↗</a></div>
 <div class="tags"><span>{{ application.get_status_display }}</span><span>{{ application.get_consideration_status_display }}</span><span>Applied {{ application.created_at|date:'M j, Y' }}</span></div>

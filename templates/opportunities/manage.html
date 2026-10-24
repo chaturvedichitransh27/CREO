@@ -1,7 +1,7 @@
 {% extends 'opportunities/base.html' %}
 {% block title %}Manage {{ posting.title }} — CREO{% endblock %}
 {% block opportunity_content %}
-<a class="back-link" href="{% url 'opportunities:index' %}">← My job postings</a>
+<a class="back-link" href="{% url 'opportunities:index' %}">← My Projects</a>
 <div class="eyebrow">YOUR PROJECT / {{ posting.brand_name|default:'BRAND NAME TO DEFINE' }}</div>
 <h1>{{ posting.title }}</h1><p><span class="status-pill">{{ posting.display_status }}</span></p>
 <div class="form-actions opp-toolbar"><a class="button" href="{% url 'opportunities:edit' posting.pk %}">{% if posting.status == 'DRAFT' %}Edit & publish{% else %}Edit project{% endif %} ↗</a><a class="button button-outline" href="{% url 'opportunities:applicants' posting.pk %}">Applicants ({{ applicant_count }})</a>{% if posting.published_at %}<a href="{{ posting.get_absolute_url }}">View public page ↗</a>{% endif %}

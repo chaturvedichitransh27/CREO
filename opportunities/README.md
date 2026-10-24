@@ -48,14 +48,36 @@ Existing brief-based approved moodboards remain available only for their origina
 Repeated invitation clicks return the existing engagement. Applicants may be invited
 after applications close, provided the delivery deadline has not passed.
 
+## Simple workspaces
+
+The creator workspace shows six currently open projects per page using the same
+published/open/deadline selector as Explore Opportunities. Each card submits to the
+existing application endpoint with CSRF and an optional message. The fixed workspace
+return destination accepts no arbitrary URL. Contact permission remains off by default;
+creators can explicitly grant it from their private application later. Applied state
+and My Applications are always scoped to the logged-in creator.
+
+The brand workspace uses the existing creator directory queryset and keyword search.
+Post a Project and My Projects are the primary actions. Project titles open applicants;
+management/edit links remain available. Studio, Gemini Brief Builder, comparison and
+saved briefs live in an accessible native details section. Creator portfolio/profile
+and verification links remain in the equivalent secondary section. Both workspaces
+show their own unread engagement notifications and link to the existing inbox.
+
 ## Local demo data
 
-Explicitly run `python manage.py seed_opportunities --development` only with
-`DJANGO_DEBUG=True` and a deliberately selected local SQLite development database.
-The command refuses PostgreSQL and non-debug settings; it never runs on startup.
-It creates five labeled fictional brands and projects with unusable passwords and
-`example.invalid` addresses. Existing usernames/emails and records are never changed.
-Reruns do not duplicate or refresh records. It creates no fake applicants or rankings.
+Run `python manage.py seed_demo_brands` explicitly with `DJANGO_DEBUG=True` and a
+local/test SQLite database. It creates five labeled fictional brands and ten realistic
+projects, using the normal JobPosting model. Pending migrations produce an actionable
+error before any data is inserted. PostgreSQL and non-debug environments are refused;
+no seed runs automatically in production.
+
+The older `seed_opportunities --development` command remains available and uses the
+same shared catalog and identities for its original five-project seed. The new command
+can add a second project to those existing, identifiable demo brands without resetting
+or editing their first projects. Colliding real accounts are skipped. Reruns preserve
+edits, deadlines, statuses and records. All demo passwords are unusable and email
+addresses use example.invalid. No applicants or scores are fabricated.
 
 ## Validation and deployment
 

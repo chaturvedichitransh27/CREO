@@ -12,6 +12,16 @@ class JobPostingQuerySet(models.QuerySet):
     def public(self):
         return self.filter(status__in=['OPEN', 'CLOSED'], published_at__isnull=False)
 
+    def available(self):
+        return self.public().filter(status='OPEN', application_deadline__gte=timezone.localdate())
+
+    def with_application_status(self, user):
+        if not user.is_authenticated or user.role != 'CREATOR':
+            return self
+        own = Application.objects.filter(posting=models.OuterRef('pk'), creator__user=user)
+        return self.annotate(viewer_application_id=models.Subquery(own.values('pk')[:1]),
+                             viewer_status=models.Subquery(own.values('status')[:1]))
+
 
 class JobPosting(models.Model):
     class Status(models.TextChoices):

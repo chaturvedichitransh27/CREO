@@ -1,7 +1,7 @@
 {% extends 'opportunities/base.html' %}
 {% block title %}{% if posting.pk %}Edit project{% else %}Post a project{% endif %} — CREO{% endblock %}
 {% block opportunity_content %}
-<a class="back-link" href="{% url 'opportunities:index' %}">← My job postings</a>
+<a class="back-link" href="{% url 'opportunities:index' %}">← My Projects</a>
 <div class="eyebrow">CREO OPPORTUNITIES / DEFINE THE POSSIBILITIES</div>
 <h1>{% if posting.pk %}Refine the{% else %}Post a{% endif %} <span class="serif">project.</span></h1>
 <p class="lead">A clear direction attracts the right creative talent. Start with a title and save a draft, or complete the essentials to publish.</p>

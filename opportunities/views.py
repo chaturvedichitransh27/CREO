@@ -3,7 +3,8 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
-from django.db.models import Count, Prefetch, Q, OuterRef, Subquery
+from django.db.models import Count, Prefetch, Q
+from django.urls import reverse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_GET, require_http_methods, require_POST
@@ -137,13 +138,12 @@ def creator_required(view):
 
 @require_GET
 def explore(request):
-    from django.utils import timezone
     form = OpportunityFilterForm(request.GET)
     postings = JobPosting.objects.public().prefetch_related('skills', 'tools').order_by('-published_at', '-pk')
     if form.is_valid():
         data = form.cleaned_data
         if not data['include_closed']:
-            postings = postings.filter(status='OPEN', application_deadline__gte=timezone.localdate())
+            postings = postings.available()
         if data['q']:
             postings = postings.filter(Q(title__icontains=data['q']) | Q(description__icontains=data['q']) | Q(brand_name__icontains=data['q']))
         for field, lookup in [('work_type', 'work_type'), ('skill', 'skills'), ('tool', 'tools'), ('currency', 'currency'),
@@ -152,9 +152,7 @@ def explore(request):
                 postings = postings.filter(**{lookup: data[field]})
     else:
         postings = postings.none()
-    if request.user.is_authenticated and request.user.role == 'CREATOR':
-        own = Application.objects.filter(posting=OuterRef('pk'), creator__user=request.user)
-        postings = postings.annotate(viewer_application_id=Subquery(own.values('pk')[:1]), viewer_status=Subquery(own.values('status')[:1]))
+    postings = postings.with_application_status(request.user)
     page = Paginator(postings, 12).get_page(request.GET.get('page'))
     return render(request, 'opportunities/explore.html', {'page_obj': page, 'filter_form': form, 'filter_query': pagination_query(request)})
 
@@ -174,6 +172,8 @@ def apply(request, pk):
     posting = get_object_or_404(JobPosting.objects.public(), pk=pk)
     existing = posting.applications.filter(creator__user=request.user).first()
     if existing:
+        if request.method == 'POST' and request.POST.get('return_to_workspace') == '1':
+            return redirect(reverse('dashboard') + '#available-projects')
         return redirect(existing)
     if not posting.accepting_applications:
         messages.error(request, 'This project is no longer accepting applications.')
@@ -186,6 +186,8 @@ def apply(request, pk):
             form.add_error(None, error)
         else:
             messages.success(request, 'Application sent. The brand has been notified.' if created else 'You have already applied.')
+            if request.POST.get('return_to_workspace') == '1':
+                return redirect(reverse('dashboard') + '#available-projects')
             return redirect(application)
     return render(request, 'opportunities/action_form.html', {'form': form, 'posting': posting,
         'heading': "I’m Interested", 'description': 'Introduce your creative approach. Contact sharing is optional and specific to this application.', 'button': 'Send application'})
