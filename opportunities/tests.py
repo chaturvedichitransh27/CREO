@@ -202,6 +202,21 @@ class PostingWorkflowTests(OpportunityTestCase):
         self.assertContains(response, self.url('manage'))
         self.assertContains(self.client.get(reverse('home')), 'Post a Project')
 
+    def test_project_cards_show_application_and_delivery_dates(self):
+        for url in [self.url('index'), reverse('dashboard')]:
+            response = self.client.get(url)
+            self.assertContains(response, self.posting.application_deadline.strftime('%b %d, %Y').replace(' 0', ' '))
+            self.assertContains(response, self.posting.deadline.strftime('%b %d, %Y').replace(' 0', ' '))
+
+    def test_empty_applicant_guidance_matches_posting_state(self):
+        self.assertContains(self.client.get(self.url('applicants')), 'Publish your project')
+        self.open_posting()
+        response = self.client.get(self.url('applicants'))
+        self.assertContains(response, 'Your project is open to applications')
+        self.assertNotContains(response, 'Publish your project')
+        change_status(self.brand, self.posting.pk, 'close', 0)
+        self.assertContains(self.client.get(self.url('applicants')), 'Applications are closed')
+
 
 class PostingSecurityTests(OpportunityTestCase):
     def test_anonymous_private_routes_require_login(self):
@@ -362,6 +377,31 @@ class ApplicantArchitectureTests(OpportunityTestCase):
         response = self.client.get(self.url('applicants'))
         self.assertContains(response, '&lt;img')
         self.assertNotContains(response, '<img src=x')
+
+    def test_applicant_portfolio_uses_existing_preview_without_edit_controls(self):
+        self.posting.content_type = 'FILM'
+        self.posting.save()
+        for index in range(4):
+            PortfolioItem.objects.create(creator=self.creator, title=f'Preview {index}',
+                format='FILM', video_url='https://www.youtube.com/watch?v=dQw4w9WgXcQ')
+        response = self.client.get(self.url('applicants'))
+        self.assertEqual(len(response.context['page_obj'][0].relevant_work), 3)
+        self.assertContains(response, 'class="work-card"', count=3)
+        self.assertContains(response, 'Watch project', count=3)
+        self.assertNotContains(response, 'Preview 0')
+        self.assertNotContains(response, 'Edit project')
+
+    def test_unavailable_creator_portfolio_is_not_previewed(self):
+        self.posting.content_type = 'FILM'
+        self.posting.save()
+        item = PortfolioItem.objects.create(creator=self.creator, title='Unavailable portfolio', format='FILM')
+        for attributes in [{'is_active': False}, {'is_active': True, 'role': 'BRAND'}]:
+            with self.subTest(attributes=attributes):
+                get_user_model().objects.filter(pk=self.creator_user.pk).update(**attributes)
+                response = self.client.get(self.url('applicants'))
+                self.assertContains(response, 'Public Creative Name')
+                self.assertNotContains(response, item.title)
+                self.assertEqual(response.context['page_obj'][0].relevant_work, [])
 
     def test_candidate_boundary_excludes_nonapplicants_withdrawn_and_inactive(self):
         other_job = self.make_posting(brand=self.other)

@@ -13,6 +13,7 @@
 .opportunities .opp-toolbar { margin: 24px 0; flex-wrap: wrap; }
 .opportunities .opp-toolbar form { margin: 0; }
 .opportunities .opp-applicant { margin: 24px 0; }
+.opportunities .opp-portfolio-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr)); gap: 20px; }
 .opportunities .opp-applicant h3, .opportunities .opp-details h3 { margin: 24px 0 12px; }
 .opportunities .opp-prose p { white-space: normal; }
 .opportunities .opp-applicant ul { padding-left: 20px; }
