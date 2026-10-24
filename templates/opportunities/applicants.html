@@ -3,17 +3,19 @@
 {% block opportunity_content %}
 <a class="back-link" href="{% url 'opportunities:manage' posting.pk %}">← {{ posting.title }}</a>
 <div class="eyebrow">CREO OPPORTUNITIES / PRIVATE TO YOUR BRAND</div><h1>The talent <span class="serif">behind it.</span></h1>
-<p class="lead">{{ page_obj.paginator.count }} applicant{{ page_obj.paginator.count|pluralize }} for {{ posting.title }}.</p>
+<p class="lead">{{ page_obj.paginator.count }} applicant{{ page_obj.paginator.count|pluralize }} matching the current filters for {{ posting.title }}.</p>
+<p class="help-text">By default, all applications are shown, including withdrawn applications.</p>
 <form method="get" class="form-panel opp-filters">{% include 'form_fields.html' with form=filter_form %}<button class="button button-outline">Filter applicants</button></form>
 {% if posting.status != 'DRAFT' %}<form method="post" action="{% url 'opportunities:recommendations' posting.pk %}" class="form-actions">{% csrf_token %}<button class="button">Find Top 5 Matches ↗</button></form>{% endif %}
 {% for application in page_obj %}<article class="brief-card opp-applicant">
-<div class="section-heading"><div><h2><a href="{{ application.creator.get_absolute_url }}">{{ application.creator.display_name }}</a></h2><p>{{ application.creator.headline }}</p></div><a class="button button-outline" href="{{ application.creator.get_absolute_url }}">Creator profile ↗</a></div>
+<div class="section-heading"><div><h2>{% if application.profile_available %}<a href="{{ application.creator.get_absolute_url }}">{{ application.creator.display_name|default:'Creator' }}</a>{% else %}{{ application.creator.display_name|default:'Creator' }}{% endif %}</h2>{% if application.profile_available %}<p>{{ application.creator.headline }}</p>{% else %}<p>This creator profile is no longer public.</p>{% endif %}</div>{% if application.profile_available %}<a class="button button-outline" href="{{ application.creator.get_absolute_url }}">Creator profile ↗</a>{% endif %}</div>
 <div class="tags"><span>{{ application.get_status_display }}</span><span>{{ application.get_consideration_status_display }}</span><span>Applied {{ application.created_at|date:'M j, Y' }}</span></div>
-<h3>Skills</h3><div class="tags">{% for skill in application.creator.skills.all %}<span>{{ skill.name }}</span>{% empty %}<span>Not specified</span>{% endfor %}</div>
+{% if application.profile_available %}<h3>Skills</h3><div class="tags">{% for skill in application.creator.skills.all %}<span>{{ skill.name }}</span>{% empty %}<span>Not specified</span>{% endfor %}</div>
 <h3>Tools</h3><div class="tags">{% for tool in application.creator.tools.all %}<span>{{ tool.name }}</span>{% empty %}<span>Not specified</span>{% endfor %}</div>
-<h3>Relevant portfolio work</h3><p class="help-text">Shared output format, style or required tools. This is not an AI ranking.</p><ul>{% for item in application.relevant_work %}<li><a href="{{ item.get_absolute_url }}">{{ item.title }} ↗</a></li>{% empty %}<li>No portfolio projects share the specified format, style or tools yet. Explore the creator’s profile for their full portfolio.</li>{% endfor %}</ul>
+{% if application.relevant_work %}<h3>Relevant portfolio work</h3><p class="help-text">Shared output format, style or required tools. This is not an AI ranking.</p>{% else %}<h3>Portfolio samples</h3><p class="help-text">Recent public work; no shared format, style or tools identified.</p>{% endif %}
+<div class="work-grid">{% for item in application.portfolio_previews %}{% include 'portfolio/card.html' with managing=False %}{% empty %}<p>No public portfolio work is available yet.</p>{% endfor %}</div>{% endif %}
 <h3>Application message</h3><div class="opp-prose">{{ application.message|default:'No message provided.'|linebreaks }}</div>
-<div class="form-actions"><a class="button button-outline" href="{{ application.get_absolute_url }}">Review application ↗</a>{% if application.status == 'SUBMITTED' %}<a class="button" href="{% url 'opportunities:considering' application.pk %}">Considering</a>{% endif %}</div>
+<div class="form-actions"><a class="button button-outline" href="{{ application.get_absolute_url }}">Review application ↗</a>{% if application.status == 'SUBMITTED' and application.profile_available %}<a class="button" href="{% url 'opportunities:considering' application.pk %}">Considering</a>{% endif %}</div>
 </article>{% empty %}<div class="empty"><span class="empty-symbol">✧</span><h2>Room for your next great collaborator.</h2><p>No applications yet for these filters. Publish your project to make it visible in Explore Opportunities.</p><a class="button" href="{% url 'opportunities:manage' posting.pk %}">Review your project ↗</a></div>{% endfor %}
 {% include 'opportunities/pagination.html' %}
 <p class="help-text">Considering notifies the creator. Only explicitly authorized professional contact details are shared.</p>

@@ -86,3 +86,21 @@ contact approval, invitation, delivery, revision and completion using real model
 and views. Regression tests cover original brief-based engagements and discovery.
 Apply the new additive migrations through the normal approved deployment process;
 no production data or deployment configuration is changed by development checks.
+
+## Brand audit clarifications
+
+Project cards show application and delivery dates. Counts on the workspace, My
+Projects and management pages include all application records, including withdrawn
+applications. Applicant-page totals reflect the current filters; matching still
+uses only active submitted creators.
+
+Applicant review reuses the public portfolio card for up to three previews. Concrete
+format/style/tool overlap retains its relevance label; otherwise recent public work
+is clearly labeled as samples. Portfolio visibility follows the existing active
+Creator account rule. Applications remain reviewable after a creator becomes
+unavailable, without linking to or previewing the hidden profile/portfolio.
+
+The brand audit requires no new migration. Work type, free-text output instructions,
+duration and additional requirements remain contextual inputs, not new scoring
+factors. Existing Smart Matching uses its supported taxonomies, portfolio format,
+aspect, style, experience, pricing, availability and delivery deadline evidence.

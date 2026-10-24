@@ -92,9 +92,11 @@ def detail(request, pk):
 def applicants(request, pk):
     posting = owned_posting(request.user, pk)
     form = ApplicantFilterForm(request.GET)
-    applications = posting.applications.select_related('creator').prefetch_related(
+    applications = posting.applications.select_related('creator__user').prefetch_related(
         'creator__skills', 'creator__tools',
-        Prefetch('creator__portfolio_items', queryset=PortfolioItem.objects.prefetch_related('tools').order_by('-pk')))
+        Prefetch('creator__portfolio_items', queryset=PortfolioItem.objects.filter(
+            creator__user__is_active=True, creator__user__role='CREATOR'
+        ).prefetch_related('tools').order_by('-pk')))
     if form.is_valid():
         filters = form.cleaned_data
         if filters['q']:
@@ -109,13 +111,15 @@ def applicants(request, pk):
     else:
         applications = applications.none()
     page = Paginator(applications, 12).get_page(request.GET.get('page'))
-    # Display only portfolio work with a concrete taxonomy/format/style overlap.
+    # Prefer concrete overlap; otherwise label available work as samples, not matches.
     tools = set(posting.tools.values_list('pk', flat=True))
     for application in page:
+        application.profile_available = application.creator.user.is_active and application.creator.user.role == 'CREATOR'
         application.relevant_work = [item for item in application.creator.portfolio_items.all()
             if (posting.content_type and item.format == posting.content_type)
             or (posting.style and item.style.casefold() == posting.style.casefold())
             or tools.intersection(tool.pk for tool in item.tools.all())][:3]
+        application.portfolio_previews = application.relevant_work or list(application.creator.portfolio_items.all())[:3]
     return render(request, 'opportunities/applicants.html', {'posting': posting, 'page_obj': page, 'filter_form': form, 'filter_query': pagination_query(request)})
 
 
