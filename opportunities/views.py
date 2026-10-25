@@ -146,6 +146,19 @@ def creator_required(view):
     return wrapped
 
 
+@creator_required
+@require_GET
+def brands(request):
+    from .forms import BrandSearchForm
+    from .selectors import public_brand_projects
+    form = BrandSearchForm(request.GET)
+    postings = public_brand_projects(form.cleaned_data['q']) if form.is_valid() else JobPosting.objects.none()
+    return render(request, 'opportunities/brands.html', {
+        'page_obj': Paginator(postings, 12).get_page(request.GET.get('page')),
+        'search_form': form, 'filter_query': pagination_query(request),
+    })
+
+
 @require_GET
 def explore(request):
     form = OpportunityFilterForm(request.GET)

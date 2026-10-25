@@ -1,0 +1,14 @@
+<article class="brief-card">
+  <div class="brief-card-top"><span class="status-pill">{{ posting.open_project_count }} open project{{ posting.open_project_count|pluralize }}</span>{% if posting.is_demo %}<span>Fictional demo brand</span>{% endif %}</div>
+  <h3><a href="{% url 'opportunities:brand' posting.brand_id %}">{{ posting.brand_name }}</a></h3>
+  {% if posting.is_demo %}<p class="help-text">Fictional demo projects — not real job offers.</p>{% endif %}
+  {% if not posting.open_project_count %}<p class="help-text">No projects currently accepting applications. Published projects remain available to explore.</p>{% endif %}
+  <p class="eyebrow">FROM A PUBLISHED PROJECT / {{ posting.get_work_type_display }}</p>
+  <h4><a href="{{ posting.get_absolute_url }}">{{ posting.title }}</a></h4>
+  <p>{{ posting.description|truncatechars:200 }}</p>
+  <div class="tags" aria-label="Creative focus">{% for specialization in posting.specializations.all %}<span>{{ specialization.name }}</span>{% endfor %}</div>
+  <div class="tags" aria-label="Required skills and tools">{% for skill in posting.skills.all %}<span>{{ skill.name }}</span>{% endfor %}{% for tool in posting.tools.all %}<span>{{ tool.name }}</span>{% endfor %}</div>
+  <div class="brief-card-facts"><span>{{ posting.currency }} {{ posting.budget_min }}–{{ posting.budget_max }}</span><span>{{ posting.display_status }}</span></div>
+  <p class="help-text">Application deadline {{ posting.application_deadline|date:'M j, Y' }} · Delivery {{ posting.deadline|date:'M j, Y' }}</p>
+  <div class="work-actions"><a href="{% url 'opportunities:brand' posting.brand_id %}">Explore brand ↗</a><a href="{{ posting.get_absolute_url }}">View {% if posting.is_demo %}demo {% endif %}project →</a></div>
+</article>

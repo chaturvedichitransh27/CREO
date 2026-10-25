@@ -19,6 +19,10 @@ def public_profiles():
         'skills', 'tools', 'specializations', Prefetch('portfolio_items', queryset=PortfolioItem.objects.select_related('creator').prefetch_related('tools', 'evidence')))
 
 def home(request):
+    if request.user.is_authenticated and request.user.role == 'CREATOR':
+        from opportunities.selectors import public_brand_projects
+        brands = public_brand_projects()
+        return render(request, 'home.html', {'featured_brands': brands[:3], 'brand_count': brands.count()})
     return render(request, 'home.html', {'creators': public_profiles()[:3], 'creator_count': public_profiles().count()})
 
 @vary_on_headers('HX-Request')

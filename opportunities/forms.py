@@ -59,6 +59,11 @@ class PostingActionForm(forms.Form):
     action = forms.ChoiceField(choices=[('close', 'Close'), ('reopen', 'Reopen')])
 
 
+class BrandSearchForm(forms.Form):
+    q = forms.CharField(required=False, max_length=140, label='Search brands or projects',
+        widget=forms.TextInput(attrs={'placeholder': 'Brand, project, skill or tool', 'type': 'search'}))
+
+
 class OpportunityFilterForm(forms.Form):
     q = forms.CharField(required=False, max_length=140, label='Search projects', widget=forms.TextInput(attrs={'placeholder': 'Project, brand or creative direction'}))
     work_type = forms.ChoiceField(required=False, choices=[('', 'Any creative work')] + list(JobPosting.WorkType.choices))

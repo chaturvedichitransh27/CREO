@@ -1,0 +1,11 @@
+{% extends 'opportunities/base.html' %}
+{% block title %}Discover Brands — CREO{% endblock %}
+{% block opportunity_content %}
+<div class="eyebrow">CREO OPPORTUNITIES / THE BRANDS BEHIND THE PROJECTS</div>
+<div class="section-heading"><div><h1>Discover <span class="serif">Brands.</span></h1><p class="lead">Find a creative direction that speaks to you. Explore brands through the projects they publish.</p></div><a class="button button-outline" href="{% url 'opportunities:explore' %}">Browse open projects ↗</a></div>
+<form method="get" action="{% url 'opportunities:brands' %}" class="form-panel" role="search">{% include 'form_fields.html' with form=search_form %}<div class="form-actions"><button class="button" type="submit">Search brands</button><a href="{% url 'opportunities:brands' %}">Clear search</a></div></form>
+<p class="help-text">{{ page_obj.paginator.count }} brand{{ page_obj.paginator.count|pluralize }}. One card per brand, drawn from its latest matching published project. Open counts include only projects currently accepting applications, across all of that brand’s published projects.</p>
+<p class="help-text">Fictional demo brands and projects are labeled. Demo projects are not real job offers.</p>
+<div class="brief-grid">{% for posting in page_obj %}{% include 'opportunities/brand_card.html' %}{% empty %}<div class="empty"><h2>No published brands match this search.</h2><p>Try another brand, project, skill or tool. Brands appear here when they publish a project.</p><a class="button button-outline" href="{% url 'opportunities:brands' %}">Clear search ↗</a></div>{% endfor %}</div>
+{% include 'opportunities/pagination.html' %}
+{% endblock %}
