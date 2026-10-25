@@ -17,6 +17,7 @@ class BriefForm(forms.ModelForm):
         }
         labels = {'tools': 'Preferred tools (optional)', 'skills': 'Required skills (optional)',
                   'specializations': 'Preferred specializations (optional)', 'commercial_use': 'Intended for commercial use'}
+        help_texts = {'usage_requirements': 'Required when intended for commercial use is checked. Describe channels, territories, duration, exclusivity, and source or release requirements.'}
 
     def clean_deadline(self):
         date = self.cleaned_data['deadline']

@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db.models.deletion import ProtectedError
 from django.shortcuts import get_object_or_404, redirect, render
+from django.http import JsonResponse
 from django.core.paginator import Paginator
 from django.views.decorators.cache import never_cache
 from django.views.decorators.vary import vary_on_headers
@@ -32,6 +33,7 @@ def owned_brief(request, pk):
 @brand_required
 @require_http_methods(['GET', 'POST'])
 def edit(request, pk=None):
+    wants_json = request.headers.get('Accept') == 'application/json'
     brief = owned_brief(request, pk) if pk else Brief(brand=request.user)
     draft_id = request.GET.get('draft', '') if not pk else ''
     draft = request.session.get('brief_drafts', {}).get(draft_id)
@@ -47,15 +49,28 @@ def edit(request, pk=None):
         try:
             save_with_references(form, references, request.user, form.save)
         except ValidationError as exc:
-            references.add_error(None, exc)
+            form.add_error(None, 'Your brief could not be saved. ' + ' '.join(exc.messages))
         else:
             if draft:
                 drafts = request.session.get('brief_drafts', {})
                 drafts.pop(draft_id, None)
                 request.session['brief_drafts'] = drafts
             messages.success(request, 'Brief saved. Explore the creators who fit your vision.')
+            if wants_json:
+                return JsonResponse({'saved': True, 'redirect_url': brief.get_absolute_url()})
             return redirect(brief)
-    return render(request, 'briefs/form.html', {'form': form, 'brief': brief, 'draft': draft, 'references': references})
+    save_errors = []
+    if request.method == 'POST':
+        for bound_form in (form, references):
+            for name, errors in bound_form.errors.items():
+                field = bound_form[name] if name in bound_form.fields else None
+                for error in errors:
+                    save_errors.append({'field_id': field.id_for_label if field else '',
+                                        'message': f'{field.label}: {error}' if field else str(error)})
+        if wants_json:
+            return JsonResponse({'saved': False, 'errors': save_errors}, status=422)
+    return render(request, 'briefs/form.html', {'form': form, 'brief': brief, 'draft': draft,
+                  'references': references, 'save_errors': save_errors})
 
 
 @brand_required

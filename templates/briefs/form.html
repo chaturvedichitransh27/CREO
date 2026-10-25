@@ -1,4 +1,6 @@
 {% extends 'base.html' %}
+{% load static %}
+{% block extra_head %}<script defer src="{% static 'js/brief-save.js' %}"></script>{% endblock %}
 {% block title %}{% if brief.pk %}Edit{% else %}Create{% endif %} a brief — CREO{% endblock %}
 {% block content %}
 <section class="container form-page">
@@ -7,6 +9,15 @@
   <h1>{% if brief.pk %}Refine the <span class="serif">vision.</span>{% else %}Make the idea <span class="serif">tangible.</span>{% endif %}</h1>
   <p class="lead">Define the essentials. Every detail is editable, and your brief stays private to your brand account.</p>
   {% if draft %}<div class="notice">{% if draft.source == 'GEMINI' %}Gemini-assisted starting point.{% else %}Local starter template — no AI generation was used.{% endif %} Review every field, replace “To define” notes, and fill in anything left blank before saving. Nothing has been saved as a brief yet.</div>{% elif not brief.pk %}<p><a class="subtle-link" href="{% url 'brief_builder' %}">Need a starting point? Try the brief builder ↗</a></p>{% endif %}
-  <form method="post" enctype="multipart/form-data" class="form-panel">{% csrf_token %}{% include 'form_fields.html' %}{% include 'briefs/reference_upload.html' %}<div class="form-actions"><button class="button" type="submit">Save brief ↗</button><a href="{% url 'dashboard' %}">Cancel</a></div></form>
+  <form method="post" enctype="multipart/form-data" class="form-panel" data-brief-save>
+    {% csrf_token %}
+    <div class="form-error" role="alert" tabindex="-1" data-save-errors {% if not save_errors %}hidden{% endif %}>
+      <strong>Brief not saved. Please check the following:</strong>
+      <ul>{% for error in save_errors %}<li>{% if error.field_id %}<a href="#{{ error.field_id }}">{{ error.message }}</a>{% else %}{{ error.message }}{% endif %}</li>{% endfor %}</ul>
+    </div>
+    {% include 'form_fields.html' %}{% include 'briefs/reference_upload.html' %}
+    <div class="form-actions"><button class="button" type="submit" data-save-button>Save brief ↗</button><a href="{% url 'dashboard' %}">Cancel</a></div>
+    <p role="status" aria-live="polite" data-save-status></p>
+  </form>
 </section>
 {% endblock %}
